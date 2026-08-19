@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Star } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CtaBanner } from "@/components/site/cta-banner";
@@ -31,13 +32,24 @@ export default function TestimonialsPage() {
                       <Star key={star} className="size-4 fill-gold text-gold" aria-hidden />
                     ))}
                   </div>
-                  <blockquote className="mt-3 text-sm leading-relaxed text-foreground/85">
+                  <p className="mt-3 font-bold text-navy">{t.title}</p>
+                  <blockquote className="mt-2 text-sm leading-relaxed text-foreground/85">
                     “{t.text}”
                   </blockquote>
                   <div className="mt-4 flex items-center gap-3">
-                    <div className="flex size-10 items-center justify-center rounded-full bg-navy text-xs font-bold text-white">
-                      {t.studentName.split(" ").map((w) => w[0]).join("").slice(0, 2)}
-                    </div>
+                    {t.avatar ? (
+                      <Image
+                        src={t.avatar}
+                        alt={t.studentName}
+                        width={40}
+                        height={40}
+                        className="size-10 shrink-0 rounded-full border-2 border-teal/30 object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-10 items-center justify-center rounded-full bg-navy text-xs font-bold text-white">
+                        {t.studentName.split(" ").map((w) => w[0]).join("").slice(0, 2)}
+                      </div>
+                    )}
                     <div>
                       <p className="text-sm font-semibold text-navy">{t.studentName}</p>
                       <p className="text-xs text-muted-foreground">

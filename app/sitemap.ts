@@ -7,7 +7,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "",
     "/courses",
     "/online-courses",
-    "/centers",
     "/corporate-training",
     "/placements",
     "/trainers",

@@ -16,7 +16,7 @@ npm run dev                  # http://localhost:3000
 
 ## What's implemented
 
-- **Public site (training-first):** Home, All Courses (filter/search — Java, MERN/Full Stack, React, C++, Python, AI & ML, Testing, DevOps, Mobile), Course Detail (curriculum accordion, trainer, reviews, JSON-LD), Online Courses, Centers, Corporate Training, Placements (honest early-stage outcomes), Trainers, Testimonials, About, Contact, FAQ, legal pages, custom 404.
+- **Public site (training-first):** Home, All Courses (filter/search — Java, MERN/Full Stack, React, C++, Python, AI & ML, Testing, DevOps, Mobile), Course Detail (curriculum accordion, trainer, reviews, JSON-LD), Online Courses (learning formats), Corporate Training, Placements (honest early-stage outcomes), Trainers, Testimonials, About, Contact, FAQ, legal pages, custom 404.
 - **Admin dashboard (`/admin`):** password login (`ADMIN_PASSWORD`, dev default `axcvia-admin`), overview stats, course management (add/edit/delete/publish/feature), and a leads inbox with status tracking (new → contacted → converted/lost).
 - **Dynamic courses:** the site runs on the static seed in `lib/data/courses.ts` until courses are added from the dashboard. Dashboard courses live in MongoDB and are merged over the seed by slug — saving a course with a seeded slug overrides it; public pages revalidate on every save.
 - **Lead capture:** enquiry forms on Home, Course Detail, Corporate Training, and Contact post to `POST /api/leads` → MongoDB `leads` collection (console log in dev without a DB).

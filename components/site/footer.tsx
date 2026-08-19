@@ -18,8 +18,8 @@ export function Footer() {
             <span className="size-2 rounded-full bg-teal-bright" aria-hidden />
           </p>
           <p className="mt-3 text-sm leading-relaxed">
-            {site.tagline}. Classroom & online instructor-led training with
-            placement support that lasts until you&apos;re hired.
+            {site.tagline}. Live online, instructor-led training with placement
+            support that lasts until you&apos;re hired — from anywhere in India.
           </p>
           <p className="mt-4 text-sm">
             <a href={`mailto:${site.email}`} className="hover:text-white">{site.email}</a>
@@ -56,7 +56,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-white">Head Office</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-white">Registered Office</h3>
           <p className="mt-4 text-sm leading-relaxed">{site.address}</p>
           <p className="mt-2 text-sm">{site.hours}</p>
           <div className="mt-4 flex gap-4 text-sm">

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -48,7 +49,7 @@ export async function generateMetadata({
   };
 }
 
-const modeLabel = { online: "Online", offline: "Classroom", hybrid: "Classroom + Online" };
+const modeLabel = { online: "Live Online", offline: "Classroom", hybrid: "Hybrid" };
 
 export default async function CourseDetailPage({ params }: PageProps<"/courses/[slug]">) {
   const { slug } = await params;
@@ -86,8 +87,25 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
       />
 
       {/* Course hero */}
-      <section className="bg-navy pb-16 pt-32 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <section className="relative overflow-hidden bg-navy pb-16 pt-32 text-white">
+        {course.image && (
+          <>
+            <Image
+              src={course.image}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover opacity-25"
+              aria-hidden
+            />
+            <div
+              className="absolute inset-0 bg-gradient-to-r from-navy-deep via-navy-deep/85 to-navy/60"
+              aria-hidden
+            />
+          </>
+        )}
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           <Reveal>
             <div className="flex flex-wrap items-center gap-2">
               <Badge className="bg-gold text-navy-deep hover:bg-gold">{course.category}</Badge>
@@ -216,10 +234,21 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
                         ))}
                       </div>
                       <p className="mt-3 text-sm leading-relaxed text-foreground/85">“{t.text}”</p>
-                      <p className="mt-3 text-sm font-semibold text-navy">
-                        {t.studentName}
-                        <span className="font-normal text-muted-foreground"> — {t.role} at {t.company}</span>
-                      </p>
+                      <div className="mt-3 flex items-center gap-2.5">
+                        {t.avatar && (
+                          <Image
+                            src={t.avatar}
+                            alt={t.studentName}
+                            width={32}
+                            height={32}
+                            className="size-8 rounded-full border-2 border-teal/30 object-cover"
+                          />
+                        )}
+                        <p className="text-sm font-semibold text-navy">
+                          {t.studentName}
+                          <span className="font-normal text-muted-foreground"> — {t.role} at {t.company}</span>
+                        </p>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

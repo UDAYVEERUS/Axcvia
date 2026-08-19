@@ -81,6 +81,20 @@ export function CourseForm({
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="image">Cover Image URL</Label>
+        <Input
+          id="image"
+          name="image"
+          type="url"
+          defaultValue={course?.image}
+          placeholder="https://images.unsplash.com/photo-…"
+        />
+        <p className="text-xs text-muted-foreground">
+          Paste an Unsplash image URL (images.unsplash.com). Leave empty for a brand gradient.
+        </p>
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
         <Textarea id="description" name="description" rows={4} defaultValue={course?.description} />
       </div>

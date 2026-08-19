@@ -74,7 +74,7 @@ export default async function ContactPage({ searchParams }: PageProps<"/contact"
                   <MapPin className="size-5 text-teal" aria-hidden />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Head office</p>
+                  <p className="text-sm text-muted-foreground">Registered office</p>
                   <p className="font-semibold text-navy">{site.address}</p>
                   <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                     <Clock className="size-4" aria-hidden /> {site.hours}
@@ -82,8 +82,8 @@ export default async function ContactPage({ searchParams }: PageProps<"/contact"
                 </div>
               </div>
               <iframe
-                title="Axcvia head office location"
-                src="https://www.google.com/maps?q=BTM+Layout,+Bengaluru&output=embed"
+                title="Axcvia registered office location"
+                src="https://www.google.com/maps?q=Ratanpur,+Panki,+Kanpur&output=embed"
                 className="mt-4 h-56 w-full rounded-lg border"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"

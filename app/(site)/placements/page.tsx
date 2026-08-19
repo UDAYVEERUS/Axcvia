@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Briefcase, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CtaBanner } from "@/components/site/cta-banner";
+import { LogoMarquee } from "@/components/site/logo-marquee";
 import { Counter, Reveal } from "@/components/site/motion";
 import { SectionHeading } from "@/components/site/section-heading";
 import { placementStories } from "@/lib/data/people";
-import { hiringPartners, stats } from "@/lib/data/site";
+import { stats } from "@/lib/data/site";
 
 export const metadata: Metadata = {
   title: "Placements — Early Outcomes We're Proud Of",
@@ -22,8 +24,18 @@ const placementStats = [
 export default function PlacementsPage() {
   return (
     <>
-      <section className="bg-navy pb-16 pt-32 text-white">
-        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6">
+      <section className="relative overflow-hidden bg-navy pb-16 pt-32 text-white">
+        <Image
+          src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=70"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover opacity-20"
+          aria-hidden
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-navy-deep/80 to-navy" aria-hidden />
+        <div className="relative mx-auto max-w-7xl px-4 text-center sm:px-6">
           <Reveal>
             <p className="text-sm font-semibold uppercase tracking-widest text-teal-bright">
               Placement Outcomes
@@ -91,24 +103,17 @@ export default function PlacementsPage() {
         </div>
       </section>
 
-      <section className="bg-secondary/40 py-16">
+      <section className="overflow-hidden bg-secondary/40 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <SectionHeading
             eyebrow="Hiring Network"
             title="Our growing hiring network"
             description="Companies where our students have interviewed or been placed — a list we're actively expanding."
           />
-          <Reveal className="mt-8 flex flex-wrap justify-center gap-3">
-            {hiringPartners.map((partner) => (
-              <span
-                key={partner}
-                className="rounded-full border bg-card px-5 py-2 text-sm font-semibold text-foreground/70"
-              >
-                {partner}
-              </span>
-            ))}
-          </Reveal>
         </div>
+        <Reveal className="mt-10">
+          <LogoMarquee />
+        </Reveal>
       </section>
 
       <CtaBanner

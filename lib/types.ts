@@ -41,6 +41,8 @@ export interface Course {
   learners: number;
   featured: boolean;
   nextBatch: string;
+  /** Cover image URL (Unsplash or uploaded); empty string falls back to a gradient. */
+  image: string;
 }
 
 export interface Trainer {
@@ -60,6 +62,7 @@ export interface Center {
   phone: string;
   hours: string;
   mapUrl: string;
+  image: string;
 }
 
 export interface Testimonial {
@@ -69,7 +72,11 @@ export interface Testimonial {
   role: string;
   company: string;
   rating: number;
+  /** Short review headline shown above the quote. */
+  title: string;
   text: string;
+  /** Portrait photo URL; empty string falls back to initials. */
+  avatar: string;
 }
 
 export interface PlacementStory {

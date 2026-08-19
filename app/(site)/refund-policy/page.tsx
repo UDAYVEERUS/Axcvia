@@ -4,7 +4,7 @@ import { site } from "@/lib/data/site";
 
 export const metadata: Metadata = {
   title: "Refund Policy",
-  description: "Axcvia's cancellation and refund policy for classroom, online, and self-paced courses.",
+  description: "Axcvia's cancellation and refund policy for live-online and self-paced courses.",
 };
 
 export default function RefundPolicyPage() {
@@ -14,7 +14,7 @@ export default function RefundPolicyPage() {
       updated="19 August 2026"
       sections={[
         {
-          heading: "Instructor-led courses (classroom & live-online)",
+          heading: "Instructor-led courses (live-online)",
           body: [
             "You may cancel within 7 calendar days of your batch start date for a full refund minus a ₹2,000 processing fee, provided less than 20% of scheduled sessions have been delivered.",
             "After 7 days or once 20% of the course has been delivered, fees are non-refundable, but you may transfer your enrollment to a later batch of the same course once, free of charge, or transfer it to another person.",

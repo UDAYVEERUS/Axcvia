@@ -32,6 +32,7 @@ const courseSchema = new Schema(
     learners: { type: Number, min: 0, default: 0 },
     featured: { type: Boolean, default: false },
     nextBatch: { type: String, trim: true, default: "" },
+    image: { type: String, trim: true, default: "" },
     isPublished: { type: Boolean, default: true },
   },
   { timestamps: true }

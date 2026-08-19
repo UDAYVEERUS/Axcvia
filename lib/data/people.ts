@@ -69,6 +69,7 @@ export const centers: Center[] = [
     phone: "+91 98765 43210",
     hours: "Mon–Sat, 9:00 AM – 8:00 PM",
     mapUrl: "https://maps.google.com/?q=BTM+Layout+Bengaluru",
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=70",
   },
   {
     name: "Axcvia Rajajinagar",
@@ -77,6 +78,7 @@ export const centers: Center[] = [
     phone: "+91 98765 43211",
     hours: "Mon–Sat, 9:00 AM – 8:00 PM",
     mapUrl: "https://maps.google.com/?q=Rajajinagar+Bengaluru",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=900&q=70",
   },
   {
     name: "Axcvia Hyderabad",
@@ -85,6 +87,7 @@ export const centers: Center[] = [
     phone: "+91 98765 43212",
     hours: "Mon–Sat, 9:00 AM – 8:00 PM",
     mapUrl: "https://maps.google.com/?q=Ameerpet+Hyderabad",
+    image: "https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=900&q=70",
   },
 ];
 
@@ -96,6 +99,8 @@ export const testimonials: Testimonial[] = [
     role: "Software Engineer",
     company: "Freshworks",
     rating: 5,
+    title: "From zero code to software engineer",
+    avatar: "https://images.unsplash.com/photo-1728141123512-87c415cecc9d?auto=format&fit=facearea&facepad=2.5&w=200&h=200&q=70",
     text: "I came from a non-CS background and had never written a line of code. The project-first teaching style and mock interviews made all the difference — I got placed within a month of finishing.",
   },
   {
@@ -105,6 +110,8 @@ export const testimonials: Testimonial[] = [
     role: "Associate Engineer",
     company: "Infosys",
     rating: 5,
+    title: "The best Java classes I have attended",
+    avatar: "https://images.unsplash.com/photo-1778692258270-bc0e80e975c0?auto=format&fit=facearea&facepad=2.5&w=200&h=200&q=70",
     text: "Suresh sir's Java classes are the best I've attended anywhere. Concepts are drilled with practice problems daily, and the placement team kept scheduling interviews until I cracked one.",
   },
   {
@@ -114,6 +121,8 @@ export const testimonials: Testimonial[] = [
     role: "Data Analyst",
     company: "Flipkart",
     rating: 5,
+    title: "The capstone carried my interviews",
+    avatar: "https://images.unsplash.com/photo-1617009762269-c062aaf6b3a0?auto=format&fit=facearea&facepad=2.5&w=200&h=200&q=70",
     text: "The capstone on a real e-commerce dataset became the centerpiece of my interviews. Practical, current, and genuinely supportive trainers.",
   },
   {
@@ -123,6 +132,8 @@ export const testimonials: Testimonial[] = [
     role: "QA Engineer",
     company: "Zoho",
     rating: 4,
+    title: "Support job to QA automation",
+    avatar: "https://images.unsplash.com/photo-1600180758890-6b94519a8ba6?auto=format&fit=facearea&facepad=2.5&w=200&h=200&q=70",
     text: "Went from a support job to QA automation in four months. The Selenium framework we built in class is exactly what companies ask about.",
   },
   {
@@ -132,6 +143,8 @@ export const testimonials: Testimonial[] = [
     role: "Frontend Developer",
     company: "Razorpay",
     rating: 5,
+    title: "Depth that tutorials never reach",
+    avatar: "https://images.unsplash.com/photo-1592621385612-4d7129426394?auto=format&fit=facearea&facepad=2.5&w=200&h=200&q=70",
     text: "Loved the depth — server components, performance, accessibility. This is not a tutorial-level course; it's how real teams build UIs.",
   },
   {
@@ -141,7 +154,42 @@ export const testimonials: Testimonial[] = [
     role: "DevOps Engineer",
     company: "Mindtree",
     rating: 5,
+    title: "Real AWS labs, real confidence",
+    avatar: "https://images.unsplash.com/photo-1649433658557-54cf58577c68?auto=format&fit=facearea&facepad=2.5&w=200&h=200&q=70",
     text: "Every concept came with a live lab on real AWS infrastructure. I cleared my AWS certification two weeks after the course ended.",
+  },
+  {
+    studentName: "Rohit Kulkarni",
+    courseSlug: "cpp-programming-dsa",
+    courseTitle: "C++ Programming & Data Structures",
+    role: "Final-year student",
+    company: "RV College",
+    rating: 5,
+    title: "DSA finally makes sense",
+    avatar: "https://images.unsplash.com/photo-1594489005731-5f1e09b71d00?auto=format&fit=facearea&facepad=2.5&w=200&h=200&q=70",
+    text: "I'd tried three online DSA courses before this. Solving problems live with a mentor who explains the pattern, not just the answer, changed everything for me.",
+  },
+  {
+    studentName: "Nikita Rao",
+    courseSlug: "ai-machine-learning-engineering",
+    courseTitle: "AI & Machine Learning Engineering",
+    role: "Software Developer",
+    company: "a Bengaluru startup",
+    rating: 5,
+    title: "Built and shipped a real AI product",
+    avatar: "https://images.unsplash.com/photo-1741354035032-eff737bfd35c?auto=format&fit=facearea&facepad=2.5&w=200&h=200&q=70",
+    text: "The GenAI modules are genuinely current — RAG, embeddings, agents. My capstone chatbot is live in production at my company today.",
+  },
+  {
+    studentName: "Arjun Pillai",
+    courseSlug: "full-stack-web-development",
+    courseTitle: "Full Stack Web Development",
+    role: "Junior Developer",
+    company: "Cognizant",
+    rating: 4,
+    title: "Small batch, big difference",
+    avatar: "https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=facearea&facepad=2.5&w=200&h=200&q=70",
+    text: "Fifteen people in a batch means your code actually gets reviewed. The mock interview feedback was brutal and exactly what I needed.",
   },
 ];
 
@@ -162,9 +210,9 @@ export const faqs: Faq[] = [
     category: "General",
   },
   {
-    question: "What formats do you offer — classroom, online, or self-paced?",
+    question: "What formats do you offer — live online or self-paced?",
     answer:
-      "All three, depending on the course: classroom batches at our Bengaluru and Hyderabad centers, live-online instructor-led batches, and self-paced recorded courses with doubt-clearing support.",
+      "Both. Live-online instructor-led batches over video with real-time doubt clearing, and self-paced recorded courses with weekly doubt-clearing sessions. We're online-first for now — classroom centers are on our roadmap.",
     category: "Courses",
   },
   {

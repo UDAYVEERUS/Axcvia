@@ -35,6 +35,7 @@ function toCourse(doc: any): Course {
     learners: doc.learners ?? 0,
     featured: doc.featured ?? false,
     nextBatch: doc.nextBatch ?? "",
+    image: doc.image ?? "",
   };
 }
 

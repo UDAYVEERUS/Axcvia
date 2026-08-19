@@ -80,6 +80,7 @@ function parseCourseForm(formData: FormData) {
     discountFee: Number(formData.get("discountFee") ?? 0) || 0,
     trainerSlug: String(formData.get("trainerSlug") ?? "").trim(),
     nextBatch: String(formData.get("nextBatch") ?? "").trim(),
+    image: String(formData.get("image") ?? "").trim(),
     formats: formData.getAll("formats").map(String),
     featured: formData.get("featured") === "on",
     isPublished: formData.get("isPublished") === "on",
