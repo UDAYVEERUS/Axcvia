@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Axcvia — Programming Training Institute Website
 
-## Getting Started
+Marketing & training website for Axcvia, built per the project Statement of Work.
 
-First, run the development server:
+**Stack:** Next.js 16 (App Router, TypeScript, Turbopack) · Tailwind CSS v4 · shadcn/ui (Radix) · Motion (Framer Motion) · MongoDB + Mongoose
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # add MONGODB_URI to persist leads
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`npm run build && npm start` for a production build.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## What's implemented
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Public site (training-first):** Home, All Courses (filter/search — Java, MERN/Full Stack, React, C++, Python, AI & ML, Testing, DevOps, Mobile), Course Detail (curriculum accordion, trainer, reviews, JSON-LD), Online Courses, Centers, Corporate Training, Placements (honest early-stage outcomes), Trainers, Testimonials, About, Contact, FAQ, legal pages, custom 404.
+- **Admin dashboard (`/admin`):** password login (`ADMIN_PASSWORD`, dev default `axcvia-admin`), overview stats, course management (add/edit/delete/publish/feature), and a leads inbox with status tracking (new → contacted → converted/lost).
+- **Dynamic courses:** the site runs on the static seed in `lib/data/courses.ts` until courses are added from the dashboard. Dashboard courses live in MongoDB and are merged over the seed by slug — saving a course with a seeded slug overrides it; public pages revalidate on every save.
+- **Lead capture:** enquiry forms on Home, Course Detail, Corporate Training, and Contact post to `POST /api/leads` → MongoDB `leads` collection (console log in dev without a DB).
+- **SEO:** per-page metadata + Open Graph, `sitemap.xml`, `robots.txt` (admin/api disallowed), Organization/Course/FAQ JSON-LD.
+- **Design:** navy/teal/gold theme on shadcn/ui tokens; Framer Motion scroll reveals, animated counters, hero animation, testimonial carousel; mobile-first responsive.
 
-## Learn More
+## Structure
 
-To learn more about Next.js, take a look at the following resources:
+- `app/(site)/` — public pages; `app/admin/` — dashboard; `app/api/leads/` — lead capture
+- `components/site/` + `components/admin/` — components; `components/ui/` — shadcn/ui primitives
+- `lib/data/` — static seed content; `lib/services/courses.ts` — merged seed+DB course reads
+- `lib/models/` — Mongoose schemas (courses, leads); `lib/admin/auth.ts` — admin session gate
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deferred to later phases (per SOW)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Student auth & dashboard, cart/checkout/payments (P1), blog CMS (P1/P2), email notifications, multi-user admin roles (current gate is single-password; swap for Clerk/NextAuth when needed).
