@@ -11,7 +11,7 @@ function ReviewCard({ t }: { t: Testimonial }) {
         {Array.from({ length: 5 }).map((_, i) => (
           <Star
             key={i}
-            className={cn(
+            className={cn( 
               "size-4",
               i < t.rating ? "fill-gold text-gold" : "fill-muted text-muted"
             )}
