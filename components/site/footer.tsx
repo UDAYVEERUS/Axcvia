@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { site, navLinks } from "@/lib/data/site";
 import { courses } from "@/lib/data/courses";
@@ -13,10 +14,15 @@ export function Footer() {
     <footer className="bg-navy-deep text-white/80">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
         <div>
-          <p className="flex items-baseline gap-1">
-            <span className="text-xl font-extrabold tracking-tight text-white">AXCVIA</span>
-            <span className="size-2 rounded-full bg-teal-bright" aria-hidden />
-          </p>
+          <Link href="/" className="inline-block rounded-xl bg-white p-2.5" aria-label="Axcvia home">
+            <Image
+              src="/logo.png"
+              alt="Axcvia — Learn. Build. Succeed."
+              width={1116}
+              height={754}
+              className="h-16 w-auto"
+            />
+          </Link>
           <p className="mt-3 text-sm leading-relaxed">
             {site.tagline}. Live online, instructor-led training with placement
             support that lasts until you&apos;re hired — from anywhere in India.

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, Phone } from "lucide-react";
@@ -38,9 +39,18 @@ export function Navbar() {
           scrolled ? "h-14" : "h-18"
         )}
       >
-        <Link href="/" className="flex items-baseline gap-1" aria-label="Axcvia home">
-          <span className="text-xl font-extrabold tracking-tight text-navy">AXCVIA</span>
-          <span className="size-2 rounded-full bg-teal" aria-hidden />
+        <Link href="/" className="flex items-center" aria-label="Axcvia home">
+          <Image
+            src="/logo.png"
+            alt="Axcvia — Learn. Build. Succeed."
+            width={1116}
+            height={754}
+            preload
+            className={cn(
+              "w-auto transition-all duration-300",
+              scrolled ? "h-10" : "h-12"
+            )}
+          />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
@@ -76,9 +86,14 @@ export function Navbar() {
           </SheetTrigger>
           <SheetContent side="right" className="w-72">
             <SheetHeader>
-              <SheetTitle className="flex items-baseline gap-1 text-left">
-                <span className="text-lg font-extrabold tracking-tight text-navy">AXCVIA</span>
-                <span className="size-1.5 rounded-full bg-teal" aria-hidden />
+              <SheetTitle className="text-left">
+                <Image
+                  src="/logo.png"
+                  alt="Axcvia — Learn. Build. Succeed."
+                  width={1116}
+                  height={754}
+                  className="h-12 w-auto"
+                />
               </SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-1 px-4" aria-label="Mobile">
