@@ -43,8 +43,8 @@ export function Navbar() {
           <Image
             src="/logo.png"
             alt="Axcvia — Learn. Build. Succeed."
-            width={1116}
-            height={754}
+            width={608}
+            height={410}
             preload
             className={cn(
               "w-auto transition-all duration-300",
@@ -90,8 +90,8 @@ export function Navbar() {
                 <Image
                   src="/logo.png"
                   alt="Axcvia — Learn. Build. Succeed."
-                  width={1116}
-                  height={754}
+                  width={608}
+                  height={410}
                   className="h-12 w-auto"
                 />
               </SheetTitle>

@@ -18,8 +18,8 @@ export function Footer() {
             <Image
               src="/logo.png"
               alt="Axcvia — Learn. Build. Succeed."
-              width={1116}
-              height={754}
+              width={608}
+              height={410}
               className="h-16 w-auto"
             />
           </Link>
