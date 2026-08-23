@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CtaBanner } from "@/components/site/cta-banner";
 import { Reveal } from "@/components/site/motion";
 import { SectionHeading } from "@/components/site/section-heading";
-import { testimonials } from "@/lib/data/people";
+import { getAllTestimonials } from "@/lib/services/testimonials";
+import { VideoTestimonial } from "@/components/site/video-testimonial";
 
 export const metadata: Metadata = {
   title: "Student Testimonials & Reviews",
@@ -13,7 +14,8 @@ export const metadata: Metadata = {
     "Read what Axcvia alumni say about their training experience and career transitions — from non-CS backgrounds to roles at Freshworks, Zoho, Razorpay, and more.",
 };
 
-export default function TestimonialsPage() {
+export default async function TestimonialsPage() {
+  const testimonials = await getAllTestimonials();
   return (
     <>
       <section className="mx-auto max-w-7xl px-4 pb-16 pt-32 sm:px-6">
@@ -24,7 +26,7 @@ export default function TestimonialsPage() {
         />
         <div className="mt-12 columns-1 gap-6 sm:columns-2 lg:columns-3 [&>*]:mb-6 [&>*]:break-inside-avoid">
           {testimonials.map((t, i) => (
-            <Reveal key={t.studentName} delay={i * 0.05}>
+            <Reveal key={t.slug} delay={i * 0.05}>
               <Card>
                 <CardContent>
                   <div className="flex gap-0.5" aria-label={`${t.rating} out of 5 stars`}>
@@ -36,6 +38,7 @@ export default function TestimonialsPage() {
                   <blockquote className="mt-2 text-sm leading-relaxed text-foreground/85">
                     “{t.text}”
                   </blockquote>
+                  {t.videoUrl && <VideoTestimonial url={t.videoUrl} name={t.studentName} />}
                   <div className="mt-4 flex items-center gap-3">
                     {t.avatar ? (
                       <Image

@@ -31,7 +31,12 @@ import { Counter, Reveal } from "@/components/site/motion";
 import { SectionHeading } from "@/components/site/section-heading";
 import { TestimonialWall } from "@/components/site/testimonial-wall";
 import { getAllCourses } from "@/lib/services/courses";
-import { faqs, testimonials, trainers } from "@/lib/data/people";
+import { getAllFaqs } from "@/lib/services/faqs";
+import { getAllTestimonials } from "@/lib/services/testimonials";
+import { getAllTrainers } from "@/lib/services/trainers";
+import { getAllBundles, getSettings } from "@/lib/services/lms";
+import { PromoBanner } from "@/components/site/promo-banner";
+import { BundleCard } from "@/components/site/bundle-card";
 import { stats } from "@/lib/data/site";
 
 const journeySteps = [
@@ -80,7 +85,15 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
 };
 
 export default async function HomePage() {
-  const courses = await getAllCourses();
+  const [courses, testimonials, trainers, faqs, settings, bundles] = await Promise.all([
+    getAllCourses(),
+    getAllTestimonials(),
+    getAllTrainers(),
+    getAllFaqs(),
+    getSettings(),
+    getAllBundles(),
+  ]);
+  const featuredBundles = bundles.filter((b) => b.featured).slice(0, 3);
   const featured = courses.filter((c) => c.featured).slice(0, 8);
   const categoryGroups = [...new Set(courses.map((c) => c.category))].map((category) => ({
     category,
@@ -102,6 +115,26 @@ export default async function HomePage() {
                 className="text-3xl font-extrabold text-navy sm:text-4xl"
               />
               <p className="mt-1 text-sm font-medium text-muted-foreground">{stat.label}</p>
+            </Reveal>
+          ))}
+        </div>
+      </section>
+
+      <PromoBanner settings={settings} />
+
+      {/* Learning formats strip */}
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[
+            { href: "/courses", title: "Classes", text: "Live + recorded sessions, study material, certificate." },
+            { href: "/mock-tests", title: "Mock Tests", text: "Timed tests, instant results, unlimited attempts." },
+            { href: "/webinars", title: "Webinars", text: "Free expert sessions — register with a student account." },
+          ].map((t, i) => (
+            <Reveal key={t.href} delay={i * 0.08}>
+              <Link href={t.href} className="block rounded-xl border bg-card p-5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
+                <p className="text-lg font-bold text-navy">{t.title} →</p>
+                <p className="mt-1 text-sm text-muted-foreground">{t.text}</p>
+              </Link>
             </Reveal>
           ))}
         </div>
@@ -255,6 +288,15 @@ export default async function HomePage() {
           </Button>
         </Reveal>
       </section>
+
+      {featuredBundles.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+          <SectionHeading eyebrow="Save more" title="Course bundles" description="Complete career tracks at one discounted price." />
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredBundles.map((b) => (<BundleCard key={b.slug} bundle={b} />))}
+          </div>
+        </section>
+      )}
 
       {/* Testimonials — auto-scrolling review wall */}
       <section className="bg-secondary/40 py-20">

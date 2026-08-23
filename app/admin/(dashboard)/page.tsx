@@ -1,32 +1,43 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Database, Inbox } from "lucide-react";
+import { ArrowRight, BookOpen, Database, Inbox, Newspaper, Receipt, UserCheck, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { blogPosts as staticPosts } from "@/lib/data/blog";
 import { courses as staticCourses } from "@/lib/data/courses";
 import { connectDb, isDbConfigured } from "@/lib/db";
+import { BlogPostModel } from "@/lib/models/blog-post";
 import { CourseModel } from "@/lib/models/course";
+import { EnrollmentModel } from "@/lib/models/enrollment";
+import { OrderModel } from "@/lib/models/order";
+import { StudentModel } from "@/lib/models/student";
+import { formatInr } from "@/components/site/course-card";
 import { LeadModel } from "@/lib/models/lead";
 
 async function getCounts() {
-  if (!isDbConfigured()) {
-    return { dbCourses: 0, leads: 0, newLeads: 0, dbReady: false };
-  }
+  const empty = { dbCourses: 0, dbPosts: 0, leads: 0, newLeads: 0, enrollments: 0, pendingEnrollments: 0, students: 0, revenue: 0, pendingOrders: 0, dbReady: false };
+  if (!isDbConfigured()) return empty;
   try {
     await connectDb();
-    const [dbCourses, leads, newLeads] = await Promise.all([
+    const [dbCourses, dbPosts, leads, newLeads, enrollments, pendingEnrollments, students, paidAgg, pendingOrders] = await Promise.all([
       CourseModel.countDocuments(),
+      BlogPostModel.countDocuments(),
       LeadModel.countDocuments(),
       LeadModel.countDocuments({ status: "new" }),
+      EnrollmentModel.countDocuments(),
+      EnrollmentModel.countDocuments({ status: "pending" }),
+      StudentModel.countDocuments(),
+      OrderModel.aggregate([{ $match: { status: "paid" } }, { $group: { _id: null, total: { $sum: "$total" } } }]),
+      OrderModel.countDocuments({ status: "pending" }),
     ]);
-    return { dbCourses, leads, newLeads, dbReady: true };
+    return { dbCourses, dbPosts, leads, newLeads, enrollments, pendingEnrollments, students, revenue: paidAgg[0]?.total ?? 0, pendingOrders, dbReady: true };
   } catch {
-    return { dbCourses: 0, leads: 0, newLeads: 0, dbReady: false };
+    return empty;
   }
 }
 
 export default async function AdminOverviewPage() {
-  const { dbCourses, leads, newLeads, dbReady } = await getCounts();
+  const { dbCourses, dbPosts, leads, newLeads, enrollments, pendingEnrollments, students, revenue, pendingOrders, dbReady } = await getCounts();
 
   const cards = [
     {
@@ -35,6 +46,34 @@ export default async function AdminOverviewPage() {
       hint: `${staticCourses.length} seeded · ${dbCourses} from dashboard`,
       icon: BookOpen,
       href: "/admin/courses",
+    },
+    {
+      title: "Revenue",
+      value: formatInr(revenue),
+      hint: dbReady ? `${pendingOrders} orders awaiting payment` : "Connect MongoDB",
+      icon: Receipt,
+      href: "/admin/orders",
+    },
+    {
+      title: "Students",
+      value: students,
+      hint: "registered accounts",
+      icon: Users,
+      href: "/admin/students",
+    },
+    {
+      title: "Blog Posts",
+      value: staticPosts.length + dbPosts,
+      hint: `${staticPosts.length} seeded · ${dbPosts} from dashboard`,
+      icon: Newspaper,
+      href: "/admin/blog",
+    },
+    {
+      title: "Enrollments",
+      value: enrollments,
+      hint: dbReady ? `${pendingEnrollments} awaiting confirmation` : "Connect MongoDB to collect enrollments",
+      icon: UserCheck,
+      href: "/admin/enrollments",
     },
     {
       title: "Total Leads",
@@ -51,7 +90,7 @@ export default async function AdminOverviewPage() {
         <div>
           <h1 className="text-2xl font-bold text-navy">Overview</h1>
           <p className="text-sm text-muted-foreground">
-            Manage your training courses and student enquiries.
+            Manage courses, blog, faculty, testimonials, enrollments and enquiries.
           </p>
         </div>
         <Badge
@@ -63,7 +102,7 @@ export default async function AdminOverviewPage() {
         </Badge>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((card) => (
           <Card key={card.title}>
             <CardHeader className="flex flex-row items-center justify-between">

@@ -43,6 +43,7 @@ export default async function ContactPage({ searchParams }: PageProps<"/contact"
   return (
     <section className="mx-auto max-w-7xl px-4 pb-20 pt-32 sm:px-6">
       <SectionHeading
+        as="h1"
         eyebrow="Contact"
         title="Talk to us"
         description="Book a free demo, ask about batches and fees, or just get honest career advice."

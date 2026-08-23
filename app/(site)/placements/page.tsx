@@ -7,7 +7,7 @@ import { CtaBanner } from "@/components/site/cta-banner";
 import { LogoMarquee } from "@/components/site/logo-marquee";
 import { Counter, Reveal } from "@/components/site/motion";
 import { SectionHeading } from "@/components/site/section-heading";
-import { placementStories } from "@/lib/data/people";
+import { getAllPlacements } from "@/lib/services/placements";
 import { stats } from "@/lib/data/site";
 
 export const metadata: Metadata = {
@@ -16,12 +16,11 @@ export const metadata: Metadata = {
     "Axcvia is a young training institute, and our first batches are already landing roles at Freshworks, Zoho, Infosys, and more. Read real early success stories.",
 };
 
-const placementStats = [
-  ...stats,
-  { label: "Highest Package (LPA)", value: 8.5, suffix: " LPA" },
-];
 
-export default function PlacementsPage() {
+export default async function PlacementsPage() {
+  const placementStories = await getAllPlacements();
+  const highest = Math.max(0, ...placementStories.map((s) => s.packageLpa));
+  const placementStats = [...stats, { label: "Highest Package (LPA)", value: highest, suffix: " LPA" }];
   return (
     <>
       <section className="relative overflow-hidden bg-navy pb-16 pt-32 text-white">

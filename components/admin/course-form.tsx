@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
+import { ImageUpload } from "@/components/admin/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { saveCourseAction } from "@/app/admin/actions";
-import { trainers } from "@/lib/data/people";
+import { getAllTrainers } from "@/lib/services/trainers";
+import { getAllQuizzes } from "@/lib/services/lms";
+import { CurriculumBuilder } from "@/components/admin/curriculum-builder";
 import { COURSE_CATEGORIES, type Course } from "@/lib/types";
 
 function syllabusToText(course?: Course) {
@@ -12,7 +15,7 @@ function syllabusToText(course?: Course) {
     .join("\n");
 }
 
-export function CourseForm({
+export async function CourseForm({
   course,
   originalSlug,
   error,
@@ -21,6 +24,8 @@ export function CourseForm({
   originalSlug?: string;
   error?: string;
 }) {
+  const [trainers, quizzes] = await Promise.all([getAllTrainers(), getAllQuizzes()]);
+  const quizOptions = quizzes.map((q) => ({ slug: q.slug, title: q.title }));
   const selectCls =
     "border-input h-9 w-full rounded-lg border bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
 
@@ -75,24 +80,37 @@ export function CourseForm({
         </div>
       </div>
 
+      <div className="grid gap-4 sm:grid-cols-4">
+        <div className="space-y-2">
+          <Label htmlFor="type">Course type</Label>
+          <select id="type" name="type" defaultValue={course?.type ?? "classes"} className={selectCls}>
+            <option value="classes">Classes (lessons + recordings)</option>
+            <option value="mock-test">Mock Test Series</option>
+            <option value="webinar">Webinar (free)</option>
+          </select>
+        </div>
+        <div className="space-y-2 sm:col-span-2">
+          <Label htmlFor="tags">Tags (comma-separated)</Label>
+          <Input id="tags" name="tags" defaultValue={course?.tags?.join(", ")} placeholder="Java, Spring Boot, Mock Test" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="validityDays">Validity (days, 0 = lifetime)</Label>
+          <Input id="validityDays" name="validityDays" type="number" min="0" defaultValue={course?.validityDays ?? 0} />
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="tagline">Tagline</Label>
         <Input id="tagline" name="tagline" defaultValue={course?.tagline} placeholder="One-line pitch shown on cards" />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="image">Cover Image URL</Label>
-        <Input
-          id="image"
-          name="image"
-          type="url"
-          defaultValue={course?.image}
-          placeholder="https://images.unsplash.com/photo-…"
-        />
-        <p className="text-xs text-muted-foreground">
-          Paste an Unsplash image URL (images.unsplash.com). Leave empty for a brand gradient.
-        </p>
-      </div>
+      <ImageUpload
+        name="image"
+        label="Cover Image"
+        folder="courses"
+        defaultValue={course?.image}
+        hint="Upload a JPG/PNG (under 8 MB) or paste a URL. Leave empty for a brand gradient."
+      />
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
@@ -183,7 +201,23 @@ export function CourseForm({
         </div>
       </div>
 
+      <div className="space-y-2">
+        <Label>Course content (lessons students see after enrolling)</Label>
+        <p className="text-xs text-muted-foreground">Group lessons into sections. Video lessons take a YouTube/Vimeo/MP4 URL; quiz lessons link to a quiz from Admin → Quizzes. Tick “Preview” to let non-enrolled visitors watch a lesson.</p>
+        <CurriculumBuilder name="curriculum" initial={course?.curriculum ?? []} quizOptions={quizOptions} />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="materials">Study materials (one per line: Label | URL)</Label>
+        <Textarea id="materials" name="materials" rows={3} defaultValue={(course?.materials ?? []).map((m) => `${m.label} | ${m.url}`).join("\n")} placeholder={"Meteorology notes (PDF) | https://res.cloudinary.com/…/notes.pdf"} />
+        <p className="text-xs text-muted-foreground">Upload PDFs to Cloudinary or Google Drive and paste the link. Only enrolled students can download.</p>
+      </div>
+
       <div className="flex flex-wrap gap-6 text-sm">
+        <label className="flex items-center gap-2">
+          <input type="checkbox" name="certificate" defaultChecked={course?.certificate !== false} className="size-4 accent-teal" />
+          Issue certificate on completion
+        </label>
         <label className="flex items-center gap-2">
           <input type="checkbox" name="featured" defaultChecked={course?.featured} className="size-4 accent-teal" />
           Featured on home page

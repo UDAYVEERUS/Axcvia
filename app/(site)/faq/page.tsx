@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FaqExplorer } from "@/components/site/faq-explorer";
 import { Reveal } from "@/components/site/motion";
-import { faqs } from "@/lib/data/people";
+import { getAllFaqs } from "@/lib/services/faqs";
 import { site } from "@/lib/data/site";
 
 export const metadata: Metadata = {
@@ -38,7 +38,8 @@ const contactChannels = [
   },
 ];
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  const faqs = await getAllFaqs();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",

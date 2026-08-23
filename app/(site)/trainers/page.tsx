@@ -5,7 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CtaBanner } from "@/components/site/cta-banner";
 import { Reveal } from "@/components/site/motion";
 import { SectionHeading } from "@/components/site/section-heading";
-import { trainers } from "@/lib/data/people";
+import Link from "next/link";
+import { getAllTrainers } from "@/lib/services/trainers";
 
 export const metadata: Metadata = {
   title: "Trainers & Faculty — Learn From Industry Practitioners",
@@ -13,7 +14,8 @@ export const metadata: Metadata = {
     "Meet Axcvia's trainers: engineers and data scientists with 9–14 years of industry experience at Flipkart, Oracle, Infosys, and high-growth startups.",
 };
 
-export default function TrainersPage() {
+export default async function TrainersPage() {
+  const trainers = await getAllTrainers();
   return (
     <>
       <section className="mx-auto max-w-7xl px-4 pb-16 pt-32 sm:px-6">
@@ -32,7 +34,9 @@ export default function TrainersPage() {
                       {trainer.name.split(" ").map((w) => w[0]).join("")}
                     </div>
                     <div>
-                      <h2 className="font-semibold text-navy">{trainer.name}</h2>
+                      <h2 className="font-semibold text-navy">
+                        <Link href={`/trainers/${trainer.slug}`} className="hover:text-teal">{trainer.name}</Link>
+                      </h2>
                       <p className="text-sm text-teal">{trainer.role}</p>
                       <p className="text-xs text-muted-foreground">
                         {trainer.experienceYears} years of experience

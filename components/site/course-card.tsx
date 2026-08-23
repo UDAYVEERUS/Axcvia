@@ -40,6 +40,8 @@ export function CourseCard({ course }: { course: Course }) {
                 ⭐ Bestseller
               </Badge>
             )}
+            {course.type === "mock-test" && <Badge className="bg-teal text-white hover:bg-teal">Mock Test Series</Badge>}
+            {course.type === "webinar" && <Badge className="bg-teal text-white hover:bg-teal">Free Webinar</Badge>}
           </div>
           <p className="absolute inset-x-0 bottom-0 p-4 text-lg font-bold leading-snug text-white drop-shadow">
             {course.title}

@@ -3,12 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  Award,
   CalendarDays,
   CheckCircle2,
   Clock,
-  Download,
-  GraduationCap,
   MapPin,
   Star,
   Users,
@@ -20,17 +17,23 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { CourseCard, formatInr } from "@/components/site/course-card";
 import { EnquiryForm } from "@/components/site/enquiry-form";
 import { Reveal } from "@/components/site/motion";
 import { SectionHeading } from "@/components/site/section-heading";
 import { courses as staticCourses } from "@/lib/data/courses";
-import { getCourseBySlug, getCourseOptions, getRelated } from "@/lib/services/courses";
-import { getTrainer, testimonials } from "@/lib/data/people";
+import { courseLessons, courseTotalMinutes, COURSE_TYPE_LABEL, getCourseBySlug, getCourseOptions, getRelated } from "@/lib/services/courses";
+import { getQuizzesForCourse } from "@/lib/services/lms";
+import { CoursePurchaseCard } from "@/components/site/course-purchase-card";
+import { formatMinutes } from "@/lib/video";
+import { ClipboardList, FileText, Lock, PlayCircle, Unlock } from "lucide-react";
+import { getPostsForCourse } from "@/lib/services/blog";
+import { getTestimonialsForCourse } from "@/lib/services/testimonials";
+import { getTrainerBySlug } from "@/lib/services/trainers";
+import { BlogCard } from "@/components/site/blog-card";
 import { site } from "@/lib/data/site";
+import { slugify } from "@/lib/utils";
 
 // Seeded courses are prerendered; dashboard-added courses render on demand.
 export function generateStaticParams() {
@@ -56,9 +59,20 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
   const course = await getCourseBySlug(slug);
   if (!course) notFound();
 
-  const trainer = getTrainer(course.trainerSlug);
-  const [related, courseOptions] = await Promise.all([getRelated(slug), getCourseOptions()]);
-  const courseTestimonials = testimonials.filter((t) => t.courseSlug === slug);
+  const [trainer, related, courseOptions, courseTestimonials, coursePosts, quizzes] = await Promise.all([
+    getTrainerBySlug(course.trainerSlug),
+    getRelated(slug),
+    getCourseOptions(),
+    getTestimonialsForCourse(slug),
+    getPostsForCourse(slug),
+    getQuizzesForCourse(slug),
+  ]);
+  // Enrollment state is resolved client-side (purchase card) so this page stays static.
+  const access = null;
+  const lessons = courseLessons(course);
+  const totalMinutes = courseTotalMinutes(course);
+  const sections = course.curriculum ?? [];
+  const lessonIcon = { video: PlayCircle, document: FileText, quiz: ClipboardList };
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -79,11 +93,22 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
     },
   };
 
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: site.url },
+      { "@type": "ListItem", position: 2, name: "Courses", item: `${site.url}/courses` },
+      { "@type": "ListItem", position: 3, name: course.category, item: `${site.url}/courses/category/${slugify(course.category)}` },
+      { "@type": "ListItem", position: 4, name: course.title, item: `${site.url}/courses/${course.slug}` },
+    ],
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify([jsonLd, breadcrumbLd]) }}
       />
 
       {/* Course hero */}
@@ -108,12 +133,17 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           <Reveal>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-gold text-navy-deep hover:bg-gold">{course.category}</Badge>
+              <Link href={`/courses/category/${slugify(course.category)}`}>
+                <Badge className="bg-gold text-navy-deep hover:bg-gold">{course.category}</Badge>
+              </Link>
               <Badge variant="outline" className="border-white/30 text-white">
                 {course.level}
               </Badge>
               {course.featured && (
                 <Badge variant="outline" className="border-white/30 text-white">Bestseller</Badge>
+              )}
+              {course.type && course.type !== "classes" && (
+                <Badge variant="outline" className="border-teal-bright/60 text-teal-bright">{COURSE_TYPE_LABEL[course.type]}</Badge>
               )}
             </div>
             <h1 className="mt-4 max-w-3xl text-3xl font-extrabold tracking-tight sm:text-5xl">
@@ -149,6 +179,11 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
           <Reveal>
             <h2 className="text-2xl font-bold text-navy">About this course</h2>
             <p className="mt-4 leading-relaxed text-muted-foreground">{course.description}</p>
+            {(course.tags ?? []).length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {course.tags!.map((t) => (<Link key={t} href={`/courses/tag/${slugify(t)}`}><Badge variant="secondary" className="hover:bg-teal/10 hover:text-teal">{t}</Badge></Link>))}
+              </div>
+            )}
           </Reveal>
 
           <Reveal className="mt-10">
@@ -164,26 +199,85 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
           </Reveal>
 
           <Reveal className="mt-10">
-            <h2 className="text-2xl font-bold text-navy">Curriculum</h2>
-            <Accordion type="single" collapsible className="mt-4" defaultValue="module-0">
-              {course.syllabus.map((mod, i) => (
-                <AccordionItem key={mod.title} value={`module-${i}`}>
-                  <AccordionTrigger className="text-left font-semibold">
-                    Module {i + 1}: {mod.title}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2">
-                      {mod.topics.map((topic) => (
-                        <li key={topic} className="flex items-start gap-2.5 text-sm text-muted-foreground">
-                          <GraduationCap className="mt-0.5 size-4 shrink-0 text-teal" aria-hidden />
-                          {topic}
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+            <h2 className="text-2xl font-bold text-navy">Course content</h2>
+            {sections.length > 0 ? (
+              <>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {sections.length} sections · {lessons.length} lessons{totalMinutes ? ` · ${formatMinutes(totalMinutes)} total` : ""}
+                  {!access && " · preview lessons are free to watch"}
+                </p>
+                <Accordion type="single" collapsible className="mt-4" defaultValue="section-0">
+                  {sections.map((sec, i) => (
+                    <AccordionItem key={sec.title + i} value={`section-${i}`}>
+                      <AccordionTrigger className="text-left font-semibold">
+                        <span>{sec.title}<span className="ml-2 text-xs font-normal text-muted-foreground">{sec.lessons.length} lessons</span></span>
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <ul className="divide-y">
+                          {sec.lessons.map((l) => {
+                            const Icon = lessonIcon[l.type];
+                            const open = Boolean(access) || l.isPreview;
+                            const href = l.type === "quiz" && l.quizSlug ? `/learn/${course.slug}/quiz/${l.quizSlug}` : `/learn/${course.slug}/${l.id}`;
+                            return (
+                              <li key={l.id} className="flex items-center gap-3 py-2.5 text-sm">
+                                <Icon className="size-4 shrink-0 text-teal" aria-hidden />
+                                {open ? <Link href={href} className="min-w-0 flex-1 truncate font-medium text-navy hover:text-teal">{l.title}</Link> : <span className="min-w-0 flex-1 truncate text-foreground/85">{l.title}</span>}
+                                {l.isPreview && !access && <Badge variant="secondary" className="bg-teal/10 text-teal">Preview</Badge>}
+                                {l.durationMinutes ? <span className="text-xs text-muted-foreground">{formatMinutes(l.durationMinutes)}</span> : null}
+                                {open ? <Unlock className="size-3.5 text-teal" aria-hidden /> : <Lock className="size-3.5 text-muted-foreground" aria-hidden />}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">Lesson recordings and materials are added to your dashboard as the batch progresses.</p>
+            )}
+
+            {quizzes.length > 0 && (
+              <div className="mt-6 rounded-xl border bg-card p-4">
+                <p className="font-semibold text-navy"><ClipboardList className="mr-1.5 inline size-4 text-teal" aria-hidden /> {quizzes.length} mock test{quizzes.length > 1 ? "s" : ""} included</p>
+                <ul className="mt-2 space-y-1.5 text-sm">
+                  {quizzes.map((q) => (
+                    <li key={q.slug} className="flex items-center justify-between gap-2">
+                      <span className="text-foreground/85">{q.title} <span className="text-xs text-muted-foreground">· {q.questions.length} Q · {q.durationMinutes} min</span></span>
+                      {q.isFreeSample || access ? (
+                        <Link href={`/learn/${course.slug}/quiz/${q.slug}`} className="shrink-0 text-xs font-semibold text-teal hover:underline">{q.isFreeSample && !access ? "Try free" : "Attempt"}</Link>
+                      ) : <Lock className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {course.syllabus.length > 0 && (
+              <details className="mt-6 rounded-xl border bg-card p-4">
+                <summary className="cursor-pointer font-semibold text-navy">Detailed syllabus ({course.syllabus.length} modules)</summary>
+                <div className="mt-3 space-y-3">
+                  {course.syllabus.map((mod, i) => (
+                    <div key={mod.title}>
+                      <p className="text-sm font-semibold text-navy">Module {i + 1}: {mod.title}</p>
+                      <ul className="mt-1 flex flex-wrap gap-1.5">{mod.topics.map((t) => <Badge key={t} variant="secondary">{t}</Badge>)}</ul>
+                    </div>
+                  ))}
+                </div>
+              </details>
+            )}
+
+            {(course.materials ?? []).length > 0 && (
+              <div className="mt-6">
+                <h3 className="font-semibold text-navy">Study materials</h3>
+                <ul className="mt-2 space-y-1.5 text-sm">
+                  {course.materials!.map((m) => (
+                    <li key={m.url} className="flex items-center gap-2"><FileText className="size-4 text-teal" aria-hidden />{access ? <a href={m.url} target="_blank" rel="noopener noreferrer" className="font-medium text-navy hover:text-teal">{m.label}</a> : <span className="text-foreground/85">{m.label}</span>}{!access && <Lock className="size-3.5 text-muted-foreground" aria-hidden />}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </Reveal>
 
           <Reveal className="mt-10">
@@ -207,7 +301,9 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
                     {trainer.name.split(" ").map((w) => w[0]).join("")}
                   </div>
                   <div>
-                    <p className="font-semibold text-navy">{trainer.name}</p>
+                    <p className="font-semibold text-navy">
+                      <Link href={`/trainers/${trainer.slug}`} className="hover:text-teal">{trainer.name}</Link>
+                    </p>
                     <p className="text-sm text-teal">{trainer.role}</p>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{trainer.bio}</p>
                     <div className="mt-3 flex flex-wrap gap-1.5">
@@ -226,7 +322,7 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
               <h2 className="text-2xl font-bold text-navy">Student reviews</h2>
               <div className="mt-4 space-y-4">
                 {courseTestimonials.map((t) => (
-                  <Card key={t.studentName}>
+                  <Card key={t.slug}>
                     <CardContent>
                       <div className="flex gap-0.5" aria-label={`${t.rating} out of 5 stars`}>
                         {Array.from({ length: t.rating }).map((_, i) => (
@@ -260,42 +356,7 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
         {/* Sticky sidebar */}
         <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
           <Reveal>
-            <Card>
-              <CardContent className="space-y-4">
-                <p>
-                  <span className="text-3xl font-extrabold text-navy">{formatInr(course.discountFee)}</span>{" "}
-                  <span className="text-muted-foreground line-through">{formatInr(course.fee)}</span>
-                  <Badge className="ml-2 bg-teal/10 text-teal hover:bg-teal/10">
-                    Save {formatInr(course.fee - course.discountFee)}
-                  </Badge>
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  EMI & installment options available · Next batch {course.nextBatch}
-                </p>
-                <div className="grid gap-2">
-                  <Button asChild size="lg" className="bg-teal text-white hover:bg-teal/90">
-                    <Link href={`/contact?course=${course.slug}`}>Enroll / Enquire Now</Link>
-                  </Button>
-                  <Button asChild size="lg" variant="outline">
-                    <Link href={`/contact?course=${course.slug}`}>
-                      <Download className="size-4" aria-hidden /> Download Syllabus (PDF)
-                    </Link>
-                  </Button>
-                </div>
-                <Separator />
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-2">
-                    <Award className="size-4 text-teal" aria-hidden /> Completion certificate
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Users className="size-4 text-teal" aria-hidden /> Placement assistance until hired
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Clock className="size-4 text-teal" aria-hidden /> Lifetime access to recordings
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
+            <CoursePurchaseCard course={course} totalMinutes={totalMinutes} lessonCount={lessons.length} />
           </Reveal>
           <Reveal delay={0.1}>
             <EnquiryForm
@@ -307,6 +368,20 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
           </Reveal>
         </aside>
       </div>
+
+      {/* Blog posts about this course */}
+      {coursePosts.length > 0 && (
+        <section className="py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <SectionHeading eyebrow="From the blog" title="Read before you enroll" />
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {coursePosts.map((p) => (
+                <BlogCard key={p.slug} post={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Related courses */}
       {related.length > 0 && (

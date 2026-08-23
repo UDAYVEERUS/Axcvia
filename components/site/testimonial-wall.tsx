@@ -3,6 +3,7 @@ import { Star } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import type { Testimonial } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { VideoTestimonial } from "@/components/site/video-testimonial";
 
 function ReviewCard({ t }: { t: Testimonial }) {
   return (
@@ -23,6 +24,7 @@ function ReviewCard({ t }: { t: Testimonial }) {
       <blockquote className="mt-2 text-sm leading-relaxed text-muted-foreground">
         “{t.text}”
       </blockquote>
+      {t.videoUrl && <VideoTestimonial url={t.videoUrl} name={t.studentName} />}
       <Separator className="my-4" />
       <figcaption className="flex items-center gap-3">
         {t.avatar ? (

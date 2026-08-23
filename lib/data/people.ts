@@ -1,4 +1,5 @@
 import type { Trainer, Center, Testimonial, PlacementStory, Faq } from "@/lib/types";
+import { slugify } from "@/lib/utils";
 
 export const trainers: Trainer[] = [
   {
@@ -91,7 +92,7 @@ export const centers: Center[] = [
   },
 ];
 
-export const testimonials: Testimonial[] = [
+const testimonialSeed: Omit<Testimonial, "slug">[] = [
   {
     studentName: "Sneha Patil",
     courseSlug: "full-stack-web-development",
@@ -193,7 +194,7 @@ export const testimonials: Testimonial[] = [
   },
 ];
 
-export const placementStories: PlacementStory[] = [
+const placementSeed: Omit<PlacementStory, "slug">[] = [
   { studentName: "Sneha Patil", background: "B.Com graduate", company: "Freshworks", role: "Software Engineer", packageLpa: 6.5, year: 2026, courseTitle: "Full Stack Web Development" },
   { studentName: "Mohammed Faizal", background: "Mechanical Engineer", company: "Infosys", role: "Associate Engineer", packageLpa: 5.2, year: 2026, courseTitle: "Java Backend Development" },
   { studentName: "Ananya Sharma", background: "B.Sc Mathematics", company: "Flipkart", role: "Data Analyst", packageLpa: 7.2, year: 2026, courseTitle: "Data Science with Python" },
@@ -202,7 +203,7 @@ export const placementStories: PlacementStory[] = [
   { studentName: "Karthik Reddy", background: "IT support, 3 yrs", company: "Mindtree", role: "DevOps Engineer", packageLpa: 7.8, year: 2026, courseTitle: "DevOps & Cloud (AWS)" },
 ];
 
-export const faqs: Faq[] = [
+const faqSeed: Omit<Faq, "slug">[] = [
   {
     question: "Do I need a computer science background to join?",
     answer:
@@ -252,3 +253,16 @@ export const faqs: Faq[] = [
     category: "Payments",
   },
 ];
+
+// Seed entries get deterministic slugs so dashboard edits can override them.
+export const testimonials: Testimonial[] = testimonialSeed.map((t) => ({
+  ...t,
+  slug: slugify(`${t.studentName}-${t.company}`),
+}));
+
+export const placementStories: PlacementStory[] = placementSeed.map((p) => ({
+  ...p,
+  slug: slugify(`${p.studentName}-${p.company}`),
+}));
+
+export const faqs: Faq[] = faqSeed.map((f) => ({ ...f, slug: slugify(f.question) }));

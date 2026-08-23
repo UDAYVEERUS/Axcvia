@@ -41,9 +41,18 @@ export const hiringPartners = [
 
 export const navLinks = [
   { label: "Courses", href: "/courses" },
+  { label: "Blog", href: "/blog" },
+  { label: "Contact", href: "/contact" },
+];
+
+// Secondary pages grouped under a "More" dropdown to keep the header uncluttered.
+export const moreLinks = [
   { label: "Learning Formats", href: "/online-courses" },
   { label: "Placements", href: "/placements" },
   { label: "Corporate Training", href: "/corporate-training" },
+  { label: "Bundles", href: "/bundles" },
+  { label: "Webinars", href: "/webinars" },
   { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
+  { label: "Trainers", href: "/trainers" },
+  { label: "FAQ", href: "/faq" },
 ];

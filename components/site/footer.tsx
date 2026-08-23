@@ -1,15 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
-import { site, navLinks } from "@/lib/data/site";
-import { courses } from "@/lib/data/courses";
+import { site, navLinks, moreLinks } from "@/lib/data/site";
+import { getAllCourses } from "@/lib/services/courses";
 
 const legalLinks = [
   { label: "Privacy Policy", href: "/privacy-policy" },
   { label: "Terms of Service", href: "/terms-of-service" },
   { label: "Refund Policy", href: "/refund-policy" },
+  { label: "Pricing Policy", href: "/pricing-policy" },
 ];
 
-export function Footer() {
+export async function Footer() {
+  const courses = await getAllCourses();
   return (
     <footer className="bg-navy-deep text-white/80">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
@@ -50,13 +52,18 @@ export function Footer() {
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-wider text-white">Institute</h3>
           <ul className="mt-4 space-y-2 text-sm">
-            {navLinks.map((l) => (
+            {[...navLinks, ...moreLinks].map((l) => (
               <li key={l.href}>
                 <Link href={l.href} className="hover:text-white">{l.label}</Link>
               </li>
             ))}
             <li><Link href="/trainers" className="hover:text-white">Trainers</Link></li>
             <li><Link href="/testimonials" className="hover:text-white">Testimonials</Link></li>
+            <li><Link href="/mock-tests" className="hover:text-white">Mock Tests</Link></li>
+            <li><Link href="/bundles" className="hover:text-white">Course Bundles</Link></li>
+            <li><Link href="/webinars" className="hover:text-white">Webinars</Link></li>
+            <li><Link href="/blog" className="hover:text-white">Blog</Link></li>
+            <li><Link href="/dashboard" className="hover:text-white">Student Login</Link></li>
             <li><Link href="/faq" className="hover:text-white">FAQ</Link></li>
           </ul>
         </div>

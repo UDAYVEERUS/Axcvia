@@ -10,8 +10,38 @@ const syllabusModuleSchema = new Schema(
   { _id: false }
 );
 
+const lessonSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    title: { type: String, required: true, trim: true },
+    type: { type: String, enum: ["video", "document", "quiz"], default: "video" },
+    videoUrl: { type: String, trim: true, default: "" },
+    durationMinutes: { type: Number, min: 0, default: 0 },
+    content: { type: String, default: "" },
+    attachmentUrl: { type: String, trim: true, default: "" },
+    attachmentLabel: { type: String, trim: true, default: "" },
+    quizSlug: { type: String, trim: true, default: "" },
+    isPreview: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
+
+const sectionSchema = new Schema(
+  {
+    title: { type: String, required: true, trim: true },
+    lessons: { type: [lessonSchema], default: [] },
+  },
+  { _id: false }
+);
+
 const courseSchema = new Schema(
   {
+    type: { type: String, enum: ["classes", "mock-test", "webinar"], default: "classes" },
+    tags: { type: [String], default: [] },
+    validityDays: { type: Number, min: 0, default: 0 },
+    certificate: { type: Boolean, default: true },
+    curriculum: { type: [sectionSchema], default: [] },
+    materials: { type: [{ label: String, url: String }], default: [] },
     title: { type: String, required: true, trim: true, maxlength: 120 },
     slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
     category: { type: String, required: true, trim: true, maxlength: 60 },

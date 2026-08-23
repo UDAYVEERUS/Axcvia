@@ -1,16 +1,14 @@
 import type { Course } from "@/lib/types";
 import { COURSE_CATEGORIES } from "@/lib/types";
 import { courses as staticCourses } from "@/lib/data/courses";
-import { connectDb, isDbConfigured } from "@/lib/db";
 import { CourseModel } from "@/lib/models/course";
+import { loadMerged } from "@/lib/services/content";
+import { slugify } from "@/lib/utils";
 
-// The public site runs on the static seed until courses are added from the
-// admin dashboard. DB courses are merged over the seed by slug, so editing a
-// seeded slug in the dashboard overrides it. Any DB failure falls back to the
-// seed so the site never breaks.
+// See lib/services/content.ts for how seed and database courses are merged.
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function toCourse(doc: any): Course {
+export function toCourse(doc: any): Course {
   return {
     title: doc.title,
     slug: doc.slug,
@@ -36,29 +34,46 @@ function toCourse(doc: any): Course {
     featured: doc.featured ?? false,
     nextBatch: doc.nextBatch ?? "",
     image: doc.image ?? "",
+    type: doc.type ?? "classes",
+    tags: doc.tags ?? [],
+    validityDays: doc.validityDays ?? 0,
+    certificate: doc.certificate ?? true,
+    curriculum: (doc.curriculum ?? []).map((s: any) => ({
+      title: s.title,
+      lessons: (s.lessons ?? []).map((l: any) => ({
+        id: l.id,
+        title: l.title,
+        type: l.type ?? "video",
+        videoUrl: l.videoUrl ?? "",
+        durationMinutes: l.durationMinutes ?? 0,
+        content: l.content ?? "",
+        attachmentUrl: l.attachmentUrl ?? "",
+        attachmentLabel: l.attachmentLabel ?? "",
+        quizSlug: l.quizSlug ?? "",
+        isPreview: Boolean(l.isPreview),
+      })),
+    })),
+    materials: (doc.materials ?? []).map((m: any) => ({ label: m.label ?? "", url: m.url ?? "" })),
   };
 }
 
-async function getDbCourses(): Promise<Course[]> {
-  if (!isDbConfigured()) return [];
-  try {
-    await connectDb();
-    const docs = await CourseModel.find({ isPublished: { $ne: false } })
-      .sort({ createdAt: -1 })
-      .lean();
-    return docs.map(toCourse);
-  } catch (err) {
-    console.error("Failed to load courses from DB, using static seed:", err);
-    return [];
-  }
+/** Lessons flattened in order, for progress and navigation. */
+export function courseLessons(course: Course) {
+  return (course.curriculum ?? []).flatMap((s) => s.lessons);
 }
 
+export function courseTotalMinutes(course: Course) {
+  return courseLessons(course).reduce((sum, l) => sum + (l.durationMinutes ?? 0), 0);
+}
+
+export const COURSE_TYPE_LABEL: Record<NonNullable<Course["type"]>, string> = {
+  classes: "Classes",
+  "mock-test": "Mock Test Series",
+  webinar: "Webinar",
+};
+
 export async function getAllCourses(): Promise<Course[]> {
-  const dbCourses = await getDbCourses();
-  if (dbCourses.length === 0) return staticCourses;
-  const bySlug = new Map(staticCourses.map((c) => [c.slug, c]));
-  for (const c of dbCourses) bySlug.set(c.slug, c);
-  return [...bySlug.values()];
+  return loadMerged(staticCourses, CourseModel, toCourse);
 }
 
 export async function getCourseBySlug(slug: string): Promise<Course | undefined> {
@@ -88,4 +103,25 @@ export async function getRelated(slug: string, limit = 3): Promise<Course[]> {
 export async function getCourseOptions() {
   const all = await getAllCourses();
   return all.map((c) => ({ title: c.title, slug: c.slug }));
+}
+
+/** Resolve a URL-safe category slug (e.g. "ai-machine-learning") back to its courses. */
+export async function getCoursesByCategorySlug(categorySlug: string) {
+  const all = await getAllCourses();
+  const category = [...new Set(all.map((c) => c.category))].find(
+    (c) => slugify(c) === categorySlug
+  );
+  if (!category) return null;
+  return { category, courses: all.filter((c) => c.category === category) };
+}
+
+export async function getCoursesByType(type: NonNullable<Course["type"]>) {
+  return (await getAllCourses()).filter((c) => (c.type ?? "classes") === type);
+}
+
+export async function getCoursesByTag(tagSlug: string) {
+  const all = await getAllCourses();
+  const tag = [...new Set(all.flatMap((c) => c.tags ?? []))].find((t) => slugify(t) === tagSlug);
+  if (!tag) return null;
+  return { tag, courses: all.filter((c) => (c.tags ?? []).includes(tag)) };
 }

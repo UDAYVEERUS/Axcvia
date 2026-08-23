@@ -1,6 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpen, Inbox, LayoutDashboard, LogOut, ExternalLink } from "lucide-react";
+import {
+  BookOpen,
+  Briefcase,
+  ClipboardList,
+  ExternalLink,
+  FileText,
+  Layers,
+  Receipt,
+  Settings,
+  TicketPercent,
+  Users,
+  GraduationCap,
+  HelpCircle,
+  Inbox,
+  LayoutDashboard,
+  LogOut,
+  MessageSquareQuote,
+  Newspaper,
+  UserCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { logoutAction } from "@/app/admin/actions";
 import { requireAdmin } from "@/lib/admin/auth";
@@ -16,7 +35,20 @@ export const dynamic = "force-dynamic";
 const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/courses", label: "Courses", icon: BookOpen },
+  { href: "/admin/quizzes", label: "Quizzes / Mock Tests", icon: ClipboardList },
+  { href: "/admin/bundles", label: "Bundles", icon: Layers },
+  { href: "/admin/pages", label: "Landing Pages", icon: FileText },
+  { href: "/admin/orders", label: "Orders", icon: Receipt },
+  { href: "/admin/students", label: "Students", icon: Users },
+  { href: "/admin/coupons", label: "Coupons", icon: TicketPercent },
+  { href: "/admin/blog", label: "Blog", icon: Newspaper },
+  { href: "/admin/trainers", label: "Trainers", icon: GraduationCap },
+  { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquareQuote },
+  { href: "/admin/placements", label: "Placements", icon: Briefcase },
+  { href: "/admin/faqs", label: "FAQs", icon: HelpCircle },
+  { href: "/admin/enrollments", label: "Enrollments", icon: UserCheck },
   { href: "/admin/leads", label: "Leads", icon: Inbox },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -32,7 +64,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             Admin
           </span>
         </Link>
-        <nav className="flex flex-1 flex-col gap-1 px-3" aria-label="Admin">
+        <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto px-3" aria-label="Admin">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -66,7 +98,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         {/* Mobile top bar */}
         <div className="flex items-center justify-between border-b bg-card px-4 py-3 md:hidden">
           <span className="font-bold text-navy">Axcvia Admin</span>
-          <div className="flex gap-2">
+          <div className="flex gap-1 overflow-x-auto">
             {navItems.map((item) => (
               <Button key={item.href} asChild variant="ghost" size="sm">
                 <Link href={item.href}>{item.label}</Link>

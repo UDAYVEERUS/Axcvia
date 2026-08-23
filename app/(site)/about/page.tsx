@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { CtaBanner } from "@/components/site/cta-banner";
 import { Counter, Reveal } from "@/components/site/motion";
 import { SectionHeading } from "@/components/site/section-heading";
-import { trainers } from "@/lib/data/people";
+import { getAllTrainers } from "@/lib/services/trainers";
 import { stats } from "@/lib/data/site";
 
 export const metadata: Metadata = {
@@ -93,7 +93,8 @@ const milestones = [
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const trainers = await getAllTrainers();
   return (
     <>
       {/* Hero */}
