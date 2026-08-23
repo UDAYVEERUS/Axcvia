@@ -94,10 +94,17 @@ export default async function HomePage() {
     getAllBundles(),
   ]);
   const featuredBundles = bundles.filter((b) => b.featured).slice(0, 3);
-  const featured = courses.filter((c) => c.featured).slice(0, 8);
-  const categoryGroups = [...new Set(courses.map((c) => c.category))].map((category) => ({
+  // Admin-flagged featured courses; otherwise the most popular paid ones so the section never sits empty.
+  const flagged = courses.filter((c) => c.featured);
+  const featured = (flagged.length
+    ? flagged
+    : courses.filter((c) => c.type !== "webinar").toSorted((a, b) => b.learners - a.learners || b.discountFee - a.discountFee)
+  ).slice(0, 8);
+  const categoryKey = (c: (typeof courses)[number]) =>
+    c.type === "mock-test" ? `${c.category} Mock Tests` : c.type === "webinar" ? "Webinars" : c.category;
+  const categoryGroups = [...new Set(courses.map(categoryKey))].map((category) => ({
     category,
-    courses: courses.filter((c) => c.category === category),
+    courses: courses.filter((c) => categoryKey(c) === category),
   }));
 
   return (
@@ -144,8 +151,8 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
         <SectionHeading
           eyebrow="Featured Courses"
-          title="Programs that get you hired"
-          description="Job-oriented tracks with live projects, expert mentorship, and dedicated placement support."
+          title="Our most popular programs"
+          description="Live classes, mock test series and expert mentorship — everything you need to clear the exam and the interview."
         />
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {featured.map((course, i) => (
@@ -168,8 +175,8 @@ export default async function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <SectionHeading
             eyebrow="Explore by Category"
-            title="Programming courses for every career path"
-            description="From your first line of code to advanced AI engineering — pick the track that matches where you want to go."
+            title="Explore courses & mock tests by category"
+            description="Pick the category that matches your goal — classes, practice test series and free webinars are all organised here."
           />
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {categoryGroups.map((group, i) => {

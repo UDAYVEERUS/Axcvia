@@ -199,9 +199,17 @@ if (DRY) { fs.writeFileSync("airship-import.json", JSON.stringify(docs, null, 2)
 
 await mongoose.connect(uri, { dbName: "axcvia" });
 const Course = mongoose.models.Course ?? mongoose.model("Course", new mongoose.Schema({}, { strict: false, collection: "courses", timestamps: true }));
+// Feature the 8 most-enrolled paid items so the home page has something to show;
+// admins can change the flag per course in /admin/courses.
+const existingFeatured = await Course.countDocuments({ featured: true, isPublished: { $ne: false } });
+if (!existingFeatured) {
+  for (const d of docs.filter((x) => x.type !== "webinar").sort((a, b) => b.learners - a.learners || b.discountFee - a.discountFee).slice(0, 8)) d.featured = true;
+}
 let n = 0;
 for (const d of docs) {
-  await Course.updateOne({ slug: d.slug }, { $set: d }, { upsert: true });
+  // `featured` is admin-managed: only ever set it to true here, never reset it.
+  const { featured, ...rest } = d;
+  await Course.updateOne({ slug: d.slug }, { $set: featured ? { ...rest, featured: true } : rest }, { upsert: true });
   n++;
 }
 console.log(`Upserted ${n} courses`);

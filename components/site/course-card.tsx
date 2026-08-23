@@ -52,26 +52,34 @@ export function CourseCard({ course }: { course: Course }) {
         </CardHeader>
         <CardContent className="flex-1 pt-4">
           <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <Clock className="size-4 text-teal" aria-hidden /> {course.duration}
-            </span>
+            {course.duration && (
+              <span className="flex items-center gap-1.5">
+                <Clock className="size-4 text-teal" aria-hidden /> {course.duration}
+              </span>
+            )}
             <span className="flex items-center gap-1.5">
               <MapPin className="size-4 text-teal" aria-hidden /> {modeLabel[course.mode]}
             </span>
-            <span className="flex items-center gap-1.5">
-              <Users className="size-4 text-teal" aria-hidden />{" "}
-              {course.learners.toLocaleString("en-IN")}+ learners
-            </span>
-            <span className="flex items-center gap-1.5">
-              <Star className="size-4 fill-gold text-gold" aria-hidden /> {course.rating} (
-              {course.reviewCount.toLocaleString("en-IN")})
-            </span>
+            {course.learners > 0 && (
+              <span className="flex items-center gap-1.5">
+                <Users className="size-4 text-teal" aria-hidden />{" "}
+                {course.learners.toLocaleString("en-IN")}+ learners
+              </span>
+            )}
+            {course.reviewCount > 0 && (
+              <span className="flex items-center gap-1.5">
+                <Star className="size-4 fill-gold text-gold" aria-hidden /> {course.rating} (
+                {course.reviewCount.toLocaleString("en-IN")})
+              </span>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex items-center justify-between border-t pt-4">
           <p>
-            <span className="text-lg font-bold text-navy">{formatInr(course.discountFee)}</span>{" "}
-            <span className="text-sm text-muted-foreground line-through">{formatInr(course.fee)}</span>
+            <span className="text-lg font-bold text-navy">{course.discountFee > 0 ? formatInr(course.discountFee) : "Free"}</span>{" "}
+            {course.fee > course.discountFee && (
+              <span className="text-sm text-muted-foreground line-through">{formatInr(course.fee)}</span>
+            )}
           </p>
           <Link
             href={`/courses/${course.slug}`}
