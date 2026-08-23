@@ -18,7 +18,7 @@ function ReviewCard({ t }: { t: Testimonial }) {
             aria-hidden
           />
         ))}
-      </div>
+      </div> 
       <p className="mt-3 font-bold text-navy">{t.title}</p>
       <blockquote className="mt-2 text-sm leading-relaxed text-muted-foreground">
         “{t.text}”
