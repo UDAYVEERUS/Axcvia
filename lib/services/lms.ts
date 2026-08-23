@@ -36,11 +36,34 @@ export function getAllQuizzes() {
 }
 
 export async function getQuizBySlug(slug: string) {
-  return (await getAllQuizzes()).find((q) => q.slug === slug);
+  // Direct lookup — the catalogue holds 1,000+ imported quizzes, so avoid
+  // loading every quiz (getAllQuizzes) just to find one.
+  if (isDbConfigured()) {
+    try {
+      await connectDb();
+      const doc: any = await QuizModel.findOne({ slug }).lean();
+      if (doc) return doc.isPublished === false ? undefined : toQuiz(doc);
+    } catch (err) {
+      console.error("getQuizBySlug DB error, falling back to seed:", err);
+    }
+  }
+  return seedQuizzes.find((q) => q.slug === slug);
 }
 
 export async function getQuizzesForCourse(courseSlug: string) {
-  return (await getAllQuizzes()).filter((q) => q.courseSlug === courseSlug);
+  // Query by courseSlug (indexed) instead of scanning the whole collection.
+  const bySlug = new Map<string, Quiz | null>();
+  for (const q of seedQuizzes) if (q.courseSlug === courseSlug) bySlug.set(q.slug, q);
+  if (isDbConfigured()) {
+    try {
+      await connectDb();
+      const docs: any[] = await QuizModel.find({ courseSlug }).lean();
+      for (const doc of docs) bySlug.set(doc.slug, doc.isPublished === false ? null : toQuiz(doc));
+    } catch (err) {
+      console.error("getQuizzesForCourse DB error, falling back to seed:", err);
+    }
+  }
+  return [...bySlug.values()].filter((q): q is Quiz => q !== null);
 }
 
 // ---------- bundles ----------
