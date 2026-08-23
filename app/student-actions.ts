@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { connectDb, isDbConfigured } from "@/lib/db";
 import { EnrollmentModel } from "@/lib/models/enrollment";
@@ -42,10 +43,24 @@ export async function registerAction(formData: FormData) {
   if (!name || !EMAIL_RE.test(email)) redirect(`${back}&error=invalid`);
   if (password.length < 8) redirect(`${back}&error=password`);
 
-  await connectDb();
-  if (await StudentModel.exists({ email })) redirect(`${back}&error=exists`);
-  const doc = await StudentModel.create({ name, email, phone, passwordHash: hashPassword(password) });
-  await setStudentSession(String(doc._id));
+  // Grab the cookie store before any DB await so it's available regardless of
+  // how the runtime propagates request context across external I/O.
+  const store = await cookies();
+  let userId = "";
+  let exists = false;
+  try {
+    await connectDb();
+    exists = Boolean(await StudentModel.exists({ email }));
+    if (!exists) {
+      const doc = await StudentModel.create({ name, email, phone, passwordHash: hashPassword(password) });
+      userId = String(doc._id);
+    }
+  } catch (err) {
+    console.error("[student-action] register failed:", err);
+    redirect(`${back}&error=server`);
+  }
+  if (exists) redirect(`${back}&error=exists`);
+  await setStudentSession(userId, store);
   redirect(next);
 }
 
@@ -55,11 +70,18 @@ export async function loginAction(formData: FormData) {
   const next = safeNext(text(formData, "next"));
   const back = `/login?next=${encodeURIComponent(next)}`;
   if (!isDbConfigured()) redirect(`${back}&error=nodb`);
-  await connectDb();
+  const store = await cookies();
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  const doc: any = await StudentModel.findOne({ email }).lean();
+  let doc: any = null;
+  try {
+    await connectDb();
+    doc = await StudentModel.findOne({ email }).lean();
+  } catch (err) {
+    console.error("[student-action] login failed:", err);
+    redirect(`${back}&error=server`);
+  }
   if (!doc || !checkPassword(password, doc.passwordHash)) redirect(`${back}&error=invalid`);
-  await setStudentSession(String(doc._id));
+  await setStudentSession(String(doc._id), store);
   redirect(next);
 }
 

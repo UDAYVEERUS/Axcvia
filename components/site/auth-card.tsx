@@ -9,6 +9,7 @@ const messages: Record<string, string> = {
   exists: "An account with this email already exists — log in instead.",
   password: "Password must be at least 8 characters.",
   nodb: "Accounts are not available yet — the database is not connected.",
+  server: "Something went wrong on our side. Please try again in a moment, or call us.",
 };
 
 export function AuthCard({ mode, next, error }: { mode: "login" | "register"; next: string; error?: string }) {

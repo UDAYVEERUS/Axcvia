@@ -57,8 +57,10 @@ function parseSessionToken(token: string | undefined): string | null {
   return userId;
 }
 
-export async function setStudentSession(userId: string) {
-  const store = await cookies();
+type CookieStore = Awaited<ReturnType<typeof cookies>>;
+
+export async function setStudentSession(userId: string, store?: CookieStore) {
+  store ??= await cookies();
   store.set(STUDENT_COOKIE, createSessionToken(userId), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
