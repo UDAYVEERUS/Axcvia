@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "res.cloudinary.com",
       },
+      // Course thumbnails migrated from the WordPress site (scripts/import-airship.mjs).
+      {
+        protocol: "https",
+        hostname: "www.airshipaviation.com",
+      },
     ],
   },
 };

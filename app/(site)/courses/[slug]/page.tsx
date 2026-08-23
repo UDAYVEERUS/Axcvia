@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { CourseCard, formatInr } from "@/components/site/course-card";
 import { EnquiryForm } from "@/components/site/enquiry-form";
+import { Markdown } from "@/components/site/markdown";
 import { Reveal } from "@/components/site/motion";
 import { SectionHeading } from "@/components/site/section-heading";
 import { courses as staticCourses } from "@/lib/data/courses";
@@ -48,7 +49,7 @@ export async function generateMetadata({
   if (!course) return {};
   return {
     title: course.title,
-    description: `${course.tagline}. ${course.duration}, ${course.level} level. Fee ${formatInr(course.discountFee)}. Next batch: ${course.nextBatch}.`,
+    description: [course.tagline, course.duration && `${course.duration}, ${course.level} level`, course.discountFee > 0 ? `Fee ${formatInr(course.discountFee)}` : "Free", course.nextBatch && `Next batch: ${course.nextBatch}`].filter(Boolean).join(". ") + ".",
   };
 }
 
@@ -151,24 +152,32 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-white/75">{course.tagline}</p>
             <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-white/80">
-              <span className="flex items-center gap-1.5">
-                <Clock className="size-4 text-teal-bright" aria-hidden /> {course.duration}
-              </span>
+              {course.duration && (
+                <span className="flex items-center gap-1.5">
+                  <Clock className="size-4 text-teal-bright" aria-hidden /> {course.duration}
+                </span>
+              )}
               <span className="flex items-center gap-1.5">
                 <MapPin className="size-4 text-teal-bright" aria-hidden /> {modeLabel[course.mode]}
               </span>
-              <span className="flex items-center gap-1.5">
-                <Users className="size-4 text-teal-bright" aria-hidden />{" "}
-                {course.learners.toLocaleString("en-IN")}+ learners
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Star className="size-4 fill-gold text-gold" aria-hidden /> {course.rating} (
-                {course.reviewCount.toLocaleString("en-IN")} reviews)
-              </span>
-              <span className="flex items-center gap-1.5">
-                <CalendarDays className="size-4 text-teal-bright" aria-hidden /> Next batch:{" "}
-                {course.nextBatch}
-              </span>
+              {course.learners > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <Users className="size-4 text-teal-bright" aria-hidden />{" "}
+                  {course.learners.toLocaleString("en-IN")}+ learners
+                </span>
+              )}
+              {course.reviewCount > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <Star className="size-4 fill-gold text-gold" aria-hidden /> {course.rating} (
+                  {course.reviewCount.toLocaleString("en-IN")} reviews)
+                </span>
+              )}
+              {course.nextBatch && (
+                <span className="flex items-center gap-1.5">
+                  <CalendarDays className="size-4 text-teal-bright" aria-hidden /> Next batch:{" "}
+                  {course.nextBatch}
+                </span>
+              )}
             </div>
           </Reveal>
         </div>
@@ -178,7 +187,9 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
         <div className="min-w-0">
           <Reveal>
             <h2 className="text-2xl font-bold text-navy">About this course</h2>
-            <p className="mt-4 leading-relaxed text-muted-foreground">{course.description}</p>
+            <div className="mt-4 leading-relaxed text-muted-foreground">
+              <Markdown content={course.description} />
+            </div>
             {(course.tags ?? []).length > 0 && (
               <div className="mt-4 flex flex-wrap gap-1.5">
                 {course.tags!.map((t) => (<Link key={t} href={`/courses/tag/${slugify(t)}`}><Badge variant="secondary" className="hover:bg-teal/10 hover:text-teal">{t}</Badge></Link>))}

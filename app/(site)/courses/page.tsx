@@ -4,16 +4,16 @@ import { Badge } from "@/components/ui/badge";
 import { CourseCatalog } from "@/components/site/course-catalog";
 import { CtaBanner } from "@/components/site/cta-banner";
 import { Reveal } from "@/components/site/motion";
-import { getAllCourses, getCategories } from "@/lib/services/courses";
+import { getAllCourses } from "@/lib/services/courses";
 
 export const metadata: Metadata = {
-  title: "All Courses — Programming, Data Science, Testing & Cloud",
+  title: "All Courses, Mock Test Series & Webinars",
   description:
-    "Browse Axcvia's job-oriented courses in Full Stack Development, Data Science, Java, Software Testing, Mobile Development, and DevOps. Live online batches with placement support, joinable from anywhere in India.",
+    "Browse every course, mock test series and free webinar — filter by A320, CPL, ATPL, DGCA, B737, cadet programmes and more. Live online classes, timed practice tests and expert sessions.",
 };
 
 export default async function CoursesPage() {
-  const [courses, courseCategories] = await Promise.all([getAllCourses(), getCategories()]);
+  const courses = await getAllCourses();
   return (
     <>
       {/* Hero */}
@@ -59,7 +59,7 @@ export default async function CoursesPage() {
 
       {/* Catalog */}
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <CourseCatalog courses={courses} categories={courseCategories} />
+        <CourseCatalog courses={courses} />
       </section>
       <CtaBanner />
     </>

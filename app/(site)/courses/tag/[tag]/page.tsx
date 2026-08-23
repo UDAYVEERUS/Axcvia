@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CourseCatalog } from "@/components/site/course-catalog";
 import { CtaBanner } from "@/components/site/cta-banner";
 import { SectionHeading } from "@/components/site/section-heading";
-import { getCategories, getCoursesByTag } from "@/lib/services/courses";
+import { getCoursesByTag } from "@/lib/services/courses";
 
 export async function generateMetadata({ params }: PageProps<"/courses/tag/[tag]">): Promise<Metadata> {
   const { tag } = await params;
@@ -13,12 +13,12 @@ export async function generateMetadata({ params }: PageProps<"/courses/tag/[tag]
 
 export default async function CourseTagPage({ params }: PageProps<"/courses/tag/[tag]">) {
   const { tag } = await params;
-  const [r, categories] = await Promise.all([getCoursesByTag(tag), getCategories()]);
+  const r = await getCoursesByTag(tag);
   if (!r) notFound();
   return (
     <>
       <section className="mx-auto max-w-7xl px-4 pb-6 pt-32 sm:px-6"><SectionHeading as="h1" eyebrow="Tagged" title={`#${r.tag}`} description={`${r.courses.length} course${r.courses.length === 1 ? "" : "s"}`} /></section>
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6"><CourseCatalog courses={r.courses} categories={categories} /></section>
+      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6"><CourseCatalog courses={r.courses} /></section>
       <CtaBanner />
     </>
   );

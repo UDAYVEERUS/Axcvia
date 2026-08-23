@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 
 export interface NavGroup {
   label: string;
+  /** When set, the dropdown label itself links here (e.g. "Courses" → /courses). */
+  href?: string;
   items: { label: string; href: string }[];
 }
 
@@ -73,16 +75,17 @@ export function Navbar({
         </Link>
 
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Main">
-          {[...navLinks.slice(0, 1)].map((link) => (
-            <Link key={link.href} href={link.href} className={linkCls}>
-              {link.label}
-            </Link>
-          ))}
-          {[...groups, { label: "More", items: moreLinks }].map((g) => (
+          {[...groups, { label: "More", items: moreLinks } as NavGroup].map((g) => (
             <div key={g.label} className="group relative">
-              <button type="button" className={`${linkCls} flex items-center gap-1`}>
-                {g.label} <ChevronDown className="size-3.5 opacity-60" aria-hidden />
-              </button>
+              {g.href ? (
+                <Link href={g.href} className={`${linkCls} flex items-center gap-1`}>
+                  {g.label} <ChevronDown className="size-3.5 opacity-60" aria-hidden />
+                </Link>
+              ) : (
+                <button type="button" className={`${linkCls} flex items-center gap-1`}>
+                  {g.label} <ChevronDown className="size-3.5 opacity-60" aria-hidden />
+                </button>
+              )}
               <div className="invisible absolute left-0 top-full z-50 min-w-52 rounded-lg border bg-background p-1.5 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                 {g.items.map((item) => (
                   <Link key={item.href} href={item.href} className="block whitespace-nowrap rounded-md px-3 py-2 text-sm hover:bg-accent">
@@ -92,7 +95,7 @@ export function Navbar({
               </div>
             </div>
           ))}
-          {navLinks.slice(1).map((link) => (
+          {navLinks.map((link) => (
             <Link key={link.href} href={link.href} className={linkCls}>
               {link.label}
             </Link>

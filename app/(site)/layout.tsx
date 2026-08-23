@@ -5,11 +5,21 @@ import { CartProvider } from "@/components/site/cart-provider";
 import { LeadPopup } from "@/components/site/lead-popup";
 import { StickyBar } from "@/components/site/sticky-bar";
 import { site } from "@/lib/data/site";
-import { getCourseOptions } from "@/lib/services/courses";
+import { getCatalogNav, getCourseOptions } from "@/lib/services/courses";
 import { getLandingNav, getSettings } from "@/lib/services/lms";
 
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
-  const [groups, settings, courseOptions] = await Promise.all([getLandingNav(), getSettings(), getCourseOptions()]);
+  const [landingGroups, settings, courseOptions, catalog] = await Promise.all([
+    getLandingNav(),
+    getSettings(),
+    getCourseOptions(),
+    getCatalogNav(),
+  ]);
+  const groups = [
+    { label: "Courses", href: "/courses", items: [{ label: "All courses", href: "/courses?type=classes" }, ...catalog.classes] },
+    { label: "Mock Tests", href: "/mock-tests", items: [{ label: "All mock test series", href: "/mock-tests" }, ...catalog.mockTests] },
+    ...landingGroups,
+  ];
   return (
     <CartProvider>
       <script

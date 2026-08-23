@@ -73,7 +73,7 @@ export const COURSE_TYPE_LABEL: Record<NonNullable<Course["type"]>, string> = {
 };
 
 export async function getAllCourses(): Promise<Course[]> {
-  return loadMerged(staticCourses, CourseModel, toCourse);
+  return loadMerged(staticCourses, CourseModel, toCourse, { sourceDate: -1, createdAt: -1 });
 }
 
 export async function getCourseBySlug(slug: string): Promise<Course | undefined> {
@@ -117,6 +117,18 @@ export async function getCoursesByCategorySlug(categorySlug: string) {
 
 export async function getCoursesByType(type: NonNullable<Course["type"]>) {
   return (await getAllCourses()).filter((c) => (c.type ?? "classes") === type);
+}
+
+/** Header menus: Courses ▾ / Mock Tests ▾ with their sub-categories (A320, CPL, ATPL…). */
+export async function getCatalogNav() {
+  const all = await getAllCourses();
+  const cats = (type: NonNullable<Course["type"]>) =>
+    [...new Set(all.filter((c) => (c.type ?? "classes") === type).map((c) => c.category))].sort();
+  return {
+    classes: cats("classes").map((name) => ({ label: name, href: `/courses?type=classes&category=${slugify(name)}` })),
+    mockTests: cats("mock-test").map((name) => ({ label: name, href: `/mock-tests?category=${slugify(name)}` })),
+    webinars: all.some((c) => c.type === "webinar"),
+  };
 }
 
 export async function getCoursesByTag(tagSlug: string) {

@@ -60,7 +60,7 @@ export default async function CourseCategoryPage({ params }: PageProps<"/courses
         </div>
       </section>
       <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
-        <CourseCatalog courses={result.courses} categories={[result.category]} />
+        <CourseCatalog courses={result.courses} />
       </section>
       <CtaBanner />
     </>

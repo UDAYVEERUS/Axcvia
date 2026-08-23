@@ -39,8 +39,9 @@ export const hiringPartners = [
   { name: "Deloitte", domain: "deloitte.com" },
 ];
 
+// "Courses" and "Mock Tests" render as dropdowns (see app/(site)/layout.tsx → getCatalogNav).
 export const navLinks = [
-  { label: "Courses", href: "/courses" },
+  { label: "Webinars", href: "/webinars" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];
@@ -51,7 +52,6 @@ export const moreLinks = [
   { label: "Placements", href: "/placements" },
   { label: "Corporate Training", href: "/corporate-training" },
   { label: "Bundles", href: "/bundles" },
-  { label: "Webinars", href: "/webinars" },
   { label: "About", href: "/about" },
   { label: "Trainers", href: "/trainers" },
   { label: "FAQ", href: "/faq" },

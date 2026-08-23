@@ -64,6 +64,10 @@ const courseSchema = new Schema(
     nextBatch: { type: String, trim: true, default: "" },
     image: { type: String, trim: true, default: "" },
     isPublished: { type: Boolean, default: true },
+    // Set by scripts/import-airship.mjs for content migrated from WordPress.
+    source: { type: String, trim: true, default: "" },
+    sourceUrl: { type: String, trim: true, default: "" },
+    sourceDate: { type: Date },
   },
   { timestamps: true }
 );

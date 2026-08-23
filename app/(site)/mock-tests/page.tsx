@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CourseCard } from "@/components/site/course-card";
+import { CourseCatalog } from "@/components/site/course-catalog";
 import { CtaBanner } from "@/components/site/cta-banner";
 import { Reveal } from "@/components/site/motion";
 import { SectionHeading } from "@/components/site/section-heading";
@@ -35,9 +35,11 @@ export default async function MockTestsPage() {
             </div>
           </Reveal>
         )}
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {series.map((c, i) => (<Reveal key={c.slug} delay={i * 0.05}><CourseCard course={c} /></Reveal>))}
-        </div>
+        {series.length > 0 && (
+          <div className="mt-12">
+            <CourseCatalog courses={series} fixedType="mock-test" />
+          </div>
+        )}
         {series.length === 0 && <p className="mt-12 text-center text-muted-foreground">Mock test series are added from the dashboard (Courses → type “Mock Test Series”).</p>}
       </section>
       <CtaBanner />
