@@ -4,12 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { connectDb, isDbConfigured } from "@/lib/db";
 import { QuizAttemptModel } from "@/lib/models/quiz-attempt";
-import { getCurrentStudent } from "@/lib/student/auth";
+import { requireStudent } from "@/lib/student/auth";
 
 export const metadata: Metadata = { title: "Test Results", robots: { index: false } };
 
 export default async function ResultsPage() {
-  const student = (await getCurrentStudent())!;
+  const student = await requireStudent("/dashboard/results");
   /* eslint-disable @typescript-eslint/no-explicit-any */
   let attempts: any[] = [];
   if (isDbConfigured()) {

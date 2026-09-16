@@ -1,70 +1,64 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { loginAction } from "@/app/admin/actions";
-import { getAdminPassword, isAdminAuthenticated } from "@/lib/admin/auth";
+import { GoogleSignInButton } from "@/components/site/google-sign-in-button";
+import { logoutAction } from "@/app/admin/actions";
+import { checkAdmin } from "@/lib/admin/auth";
+import { isGoogleConfigured } from "@/lib/auth";
 
 export const metadata: Metadata = {
   title: "Admin Login",
   robots: { index: false, follow: false },
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminLoginPage({ searchParams }: PageProps<"/admin/login">) {
-  if (await isAdminAuthenticated()) redirect("/admin");
+  const check = await checkAdmin();
+  if (check.status === "ok") redirect("/admin");
   const { error } = await searchParams;
-  const passwordConfigured = getAdminPassword() !== null;
+  const configured = isGoogleConfigured();
+  const oauthError = typeof error === "string" && error !== "forbidden";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary/40 px-4 pt-16">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-navy">
-            <ShieldCheck className="size-6 text-teal-bright" aria-hidden />
-          </div>
-          <CardTitle className="mt-2 text-navy">Axcvia Admin</CardTitle>
-          <p className="text-sm text-muted-foreground">Sign in to manage courses and leads</p>
-        </CardHeader>
-        <CardContent>
-          {!passwordConfigured ? (
-            <p className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
-              ADMIN_PASSWORD is not configured on this server. Set it in your environment
-              variables to enable the dashboard.
+    <div className="flex min-h-screen items-center justify-center bg-secondary/60 px-4 py-16">
+      <div className="w-full max-w-sm rounded-2xl border bg-card p-6 shadow-xl shadow-navy/5 sm:p-8">
+        <Image src="/logo.png" alt="Axcvia" width={608} height={410} className="mx-auto h-12 w-auto" />
+        <div className="mt-5 flex items-center justify-center gap-2">
+          <ShieldCheck className="size-5 text-teal" aria-hidden />
+          <h1 className="text-xl font-extrabold text-navy">Admin dashboard</h1>
+        </div>
+
+        {check.status === "forbidden" ? (
+          <div className="mt-6 space-y-4">
+            <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+              You&apos;re signed in as <strong className="font-semibold">{check.email}</strong>, which doesn&apos;t have admin access. Ask an existing admin to grant it, or switch accounts.
             </p>
-          ) : (
-            <form action={loginAction} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="admin-password">Password</Label>
-                <Input
-                  id="admin-password"
-                  name="password"
-                  type="password"
-                  required
-                  autoFocus
-                  autoComplete="current-password"
-                />
-              </div>
-              {error && (
-                <p role="alert" className="text-sm font-medium text-destructive">
-                  Incorrect password. Please try again.
-                </p>
-              )}
-              <Button type="submit" className="w-full bg-teal text-white hover:bg-teal/90">
-                Sign In
+            <form action={logoutAction}>
+              <Button type="submit" variant="outline" size="lg" className="w-full">
+                Sign out and use another account
               </Button>
-              {process.env.NODE_ENV === "development" && !process.env.ADMIN_PASSWORD && (
-                <p className="text-xs text-muted-foreground">
-                  Dev default password: <code className="font-mono">axcvia-admin</code> (set
-                  ADMIN_PASSWORD to change)
-                </p>
-              )}
             </form>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        ) : (
+          <div className="mt-6 space-y-4">
+            {oauthError && (
+              <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+                Google sign-in didn&apos;t complete. Please try again.
+              </p>
+            )}
+            {!configured && (
+              <p className="rounded-lg border bg-secondary p-3 text-sm text-muted-foreground">
+                Google sign-in isn&apos;t configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET on the server.
+              </p>
+            )}
+            <GoogleSignInButton callbackURL="/admin" errorCallbackURL="/admin/login" label="Sign in with Google" disabled={!configured} />
+            <p className="text-center text-xs text-muted-foreground">Only accounts with the admin role can open the dashboard.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

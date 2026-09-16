@@ -9,10 +9,12 @@ import { placementStories as seed } from "@/lib/data/people";
 import { PlacementModel } from "@/lib/models/placement";
 import { loadForAdmin } from "@/lib/services/content";
 import { toPlacement } from "@/lib/services/placements";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Placements" };
 
 export default async function AdminPlacementsPage({ searchParams }: PageProps<"/admin/placements">) {
+  await requireAdmin();
   const flash = await searchParams;
   const { rows, dbReady } = await loadForAdmin(seed, PlacementModel, toPlacement);
 

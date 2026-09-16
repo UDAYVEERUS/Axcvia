@@ -8,9 +8,9 @@ import type { SiteSettings } from "@/lib/types";
 export function PromoBanner({ settings }: { settings: SiteSettings }) {
   if (!settings.promoEnabled) return null;
   return (
-    <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+    <section className="mx-auto max-w-7xl px-4 pt-10 sm:px-6 sm:pt-14">
       <Reveal>
-        <div className="grid gap-6 overflow-hidden rounded-2xl border-2 border-gold/50 bg-gradient-to-r from-gold/15 via-card to-teal/10 p-6 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid gap-6 overflow-hidden rounded-2xl border border-teal/20 bg-linear-to-r from-teal-bright/10 via-card to-gold/10 p-6 sm:p-10 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-widest text-gold-deep"><Sparkles className="size-4" aria-hidden /> Limited offer</p>
             <h2 className="mt-2 text-2xl font-extrabold text-navy sm:text-3xl">{settings.promoTitle}</h2>

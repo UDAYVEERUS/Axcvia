@@ -9,10 +9,12 @@ import { trainers as seed } from "@/lib/data/people";
 import { TrainerModel } from "@/lib/models/trainer";
 import { loadForAdmin } from "@/lib/services/content";
 import { toTrainer } from "@/lib/services/trainers";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Trainers" };
 
 export default async function AdminTrainersPage({ searchParams }: PageProps<"/admin/trainers">) {
+  await requireAdmin();
   const flash = await searchParams;
   const { rows, dbReady } = await loadForAdmin(seed, TrainerModel, toTrainer);
 

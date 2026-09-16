@@ -12,6 +12,7 @@ import {
 import { updateLeadStatusAction } from "@/app/admin/actions";
 import { connectDb, isDbConfigured } from "@/lib/db";
 import { LeadModel } from "@/lib/models/lead";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Leads" };
 
@@ -60,6 +61,7 @@ async function getLeads(): Promise<{ leads: LeadRow[]; dbReady: boolean }> {
 }
 
 export default async function AdminLeadsPage() {
+  await requireAdmin();
   const { leads, dbReady } = await getLeads();
 
   return (

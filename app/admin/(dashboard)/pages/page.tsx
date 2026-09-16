@@ -9,10 +9,12 @@ import { landingPages as seed } from "@/lib/data/lms";
 import { LandingPageModel } from "@/lib/models/landing-page";
 import { loadForAdmin } from "@/lib/services/content";
 import { toLandingPage } from "@/lib/services/lms";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Landing Pages" };
 
 export default async function Page({ searchParams }: PageProps<"/admin/pages">) {
+  await requireAdmin();
   const flash = await searchParams;
   const { rows, dbReady } = await loadForAdmin(seed, LandingPageModel, toLandingPage);
   return (

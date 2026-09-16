@@ -10,10 +10,12 @@ import { faqs as seed } from "@/lib/data/people";
 import { FaqModel } from "@/lib/models/faq";
 import { loadForAdmin } from "@/lib/services/content";
 import { toFaq } from "@/lib/services/faqs";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "FAQs" };
 
 export default async function AdminFaqsPage({ searchParams }: PageProps<"/admin/faqs">) {
+  await requireAdmin();
   const flash = await searchParams;
   const { rows, dbReady } = await loadForAdmin(seed, FaqModel, toFaq);
 

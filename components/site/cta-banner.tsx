@@ -15,28 +15,22 @@ export function CtaBanner({
   href?: string;
 }) {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+    <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-16">
       <Reveal>
-        <div className="relative overflow-hidden rounded-2xl bg-navy px-6 py-12 text-center sm:px-12">
-          <div
-            aria-hidden
-            className="absolute -right-20 -top-20 size-64 rounded-full bg-teal/20 blur-3xl"
-          />
-          <div
-            aria-hidden
-            className="absolute -bottom-24 -left-16 size-64 rounded-full bg-gold/20 blur-3xl"
-          />
-          <h2 className="relative text-2xl font-bold text-white sm:text-3xl">{title}</h2>
-          <p className="relative mx-auto mt-3 max-w-2xl text-white/75">{description}</p>
-          <Button
-            asChild
-            size="lg"
-            className="relative mt-7 bg-gold text-navy-deep hover:bg-gold/90"
-          >
-            <Link href={href}>
-              {buttonLabel} <ArrowRight className="size-4" aria-hidden />
-            </Link>
-          </Button>
+        <div className="relative overflow-hidden rounded-3xl bg-navy px-6 py-10 sm:px-12 sm:py-14">
+          <div aria-hidden className="absolute -right-24 -top-24 size-80 rounded-full bg-teal-bright/25 blur-3xl" />
+          <div aria-hidden className="absolute -bottom-28 -left-16 size-72 rounded-full bg-teal/30 blur-3xl" />
+          <div className="relative grid items-center gap-6 text-center lg:grid-cols-[1fr_auto] lg:text-left">
+            <div>
+              <h2 className="text-2xl font-extrabold text-white sm:text-3xl">{title}</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-white/75 lg:mx-0">{description}</p>
+            </div>
+            <Button asChild size="lg" className="mx-auto bg-white text-navy hover:bg-white/90 lg:mx-0">
+              <Link href={href}>
+                {buttonLabel} <ArrowRight className="size-4" aria-hidden />
+              </Link>
+            </Button>
+          </div>
         </div>
       </Reveal>
     </section>

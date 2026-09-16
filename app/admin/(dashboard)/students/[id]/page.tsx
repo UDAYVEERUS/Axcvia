@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Flash, selectCls } from "@/components/admin/admin-shell";
-import { manualEnrollAction, revokeEnrollmentAction } from "@/app/admin/actions";
+import { manualEnrollAction, revokeEnrollmentAction, setUserRoleAction } from "@/app/admin/actions";
+import { requireAdmin } from "@/lib/admin/auth";
 import { connectDb, isDbConfigured } from "@/lib/db";
 import { QuizAttemptModel } from "@/lib/models/quiz-attempt";
 import { StudentModel } from "@/lib/models/student";
@@ -14,21 +15,24 @@ import { getCourseOptions } from "@/lib/services/courses";
 import { getStudentEnrollments, isActive } from "@/lib/student/enrollments";
 import { formatDate } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Student" };
+export const metadata: Metadata = { title: "User" };
 
 export default async function StudentPage({ params, searchParams }: PageProps<"/admin/students/[id]">) {
+  const me = await requireAdmin();
   const { id } = await params;
   const { saved, error } = await searchParams;
-  if (!isDbConfigured()) notFound();
+  if (!isDbConfigured() || !/^[a-f0-9]{24}$/i.test(id)) notFound();
   await connectDb();
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  const s: any = await StudentModel.findById(id).lean().catch(() => null);
+  const s: any = await StudentModel.findById(id).select("name email phone role banned createdAt").lean().catch(() => null);
   if (!s) notFound();
   const [enrollments, courses, attempts] = await Promise.all([
     getStudentEnrollments(id),
     getCourseOptions(),
     QuizAttemptModel.find({ userId: id }).sort({ createdAt: -1 }).limit(50).lean() as Promise<any[]>,
   ]);
+  const isAdminUser = s.role === "admin";
+  const isMe = String(s._id) === me.userId;
 
   return (
     <div>
@@ -36,6 +40,24 @@ export default async function StudentPage({ params, searchParams }: PageProps<"/
       <p className="text-sm text-muted-foreground">{s.email} · {s.phone || "no phone"} · joined {formatDate(new Date(s.createdAt).toISOString())}</p>
       {saved && <Flash tone="ok">Saved.</Flash>}
       {error === "missing" && <Flash tone="error">Pick a course.</Flash>}
+      {error === "self" && <Flash tone="error">You can&apos;t change your own role.</Flash>}
+
+      <div className="mt-5 flex flex-wrap items-center gap-3 rounded-xl border bg-card p-4">
+        <p className="text-sm font-medium text-navy">Role</p>
+        {isAdminUser ? <Badge className="bg-navy text-white">Admin</Badge> : <Badge variant="secondary">Student</Badge>}
+        {s.banned && <Badge variant="destructive">Banned</Badge>}
+        {isMe ? (
+          <p className="text-xs text-muted-foreground">This is your account.</p>
+        ) : (
+          <form action={setUserRoleAction} className="ml-auto">
+            <input type="hidden" name="userId" value={id} />
+            <input type="hidden" name="role" value={isAdminUser ? "user" : "admin"} />
+            <Button type="submit" variant="outline" size="sm" className={isAdminUser ? "text-destructive" : ""}>
+              {isAdminUser ? "Remove admin access" : "Make admin"}
+            </Button>
+          </form>
+        )}
+      </div>
 
       <form action={manualEnrollAction} className="mt-6 grid gap-4 rounded-xl border bg-card p-5 sm:grid-cols-[1fr_160px_auto]">
         <input type="hidden" name="userId" value={id} />

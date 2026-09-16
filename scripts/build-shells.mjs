@@ -1,21 +1,3 @@
-// Build placeholder quiz shells and complete curriculum outlines for the
-// Airship-imported courses, WITHOUT touching any gated/paid Airship content.
-//
-//   node scripts/build-shells.mjs --dry   # report only, write nothing
-//   node scripts/build-shells.mjs         # write to MongoDB
-//
-// Phase A — Quiz shells:
-//   For every quiz-type lesson already in a course's curriculum (scraped from
-//   Airship's PUBLIC course sidebar), create a Quiz document with placeholder
-//   questions and link the lesson to it via `quizSlug`. This reproduces
-//   Airship's structure and per-series test counts (e.g. "A320 Systems — 58
-//   tests", "DGCA Combined — 276") so the demo looks complete. Every question
-//   is clearly a placeholder to replace in Admin → Quizzes.
-//
-// Phase B — Curriculum completion:
-//   Pull the PUBLIC lesson list (wp/v2/lesson — titles only, 1,218 of them),
-//   map each to its course by URL slug, and append any lesson title missing
-//   from the scraped curriculum. No video URLs or gated content are fetched.
 
 import fs from "node:fs";
 import mongoose from "mongoose";

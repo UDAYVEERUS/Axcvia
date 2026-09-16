@@ -2,9 +2,10 @@
 
 import type { Model } from "mongoose";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { ADMIN_COOKIE, requireAdmin, sessionToken, verifyPassword } from "@/lib/admin/auth";
+import { requireAdmin } from "@/lib/admin/auth";
+import { auth } from "@/lib/auth";
 import { connectDb, isDbConfigured } from "@/lib/db";
 import { BlogPostModel } from "@/lib/models/blog-post";
 import { BundleModel } from "@/lib/models/bundle";
@@ -14,6 +15,7 @@ import { OrderModel } from "@/lib/models/order";
 import { QuizModel } from "@/lib/models/quiz";
 import { SettingsModel } from "@/lib/models/settings";
 import { StudentModel } from "@/lib/models/student";
+import { COURSE_BLUEPRINTS, buildCourseFromBlueprint } from "@/lib/seo/course-blueprints";
 import { getCourseBySlug } from "@/lib/services/courses";
 import { grantEnrollment } from "@/lib/student/enrollments";
 import { fulfilOrder } from "@/lib/student/orders";
@@ -27,27 +29,26 @@ import { TrainerModel } from "@/lib/models/trainer";
 import { slugify } from "@/lib/utils";
 
 // ---------- auth ----------
-
-export async function loginAction(formData: FormData) {
-  const password = String(formData.get("password") ?? "");
-  if (!verifyPassword(password)) {
-    redirect("/admin/login?error=1");
-  }
-  const cookieStore = await cookies();
-  cookieStore.set(ADMIN_COOKIE, sessionToken()!, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-  redirect("/admin");
-}
+// Admins sign in with Google (Better Auth); access is the "admin" role on
+// their user record. Every action below calls requireAdmin() itself.
 
 export async function logoutAction() {
-  const cookieStore = await cookies();
-  cookieStore.delete(ADMIN_COOKIE);
+  await auth.api.signOut({ headers: await headers() }).catch(() => null);
   redirect("/admin/login");
+}
+
+/** Promote a user to admin or demote them back to a student. */
+export async function setUserRoleAction(formData: FormData) {
+  const me = await requireAdmin();
+  const userId = String(formData.get("userId") ?? "");
+  const role = formData.get("role") === "admin" ? "admin" : "user";
+  if (!/^[a-f0-9]{24}$/i.test(userId)) redirect("/admin/students");
+  // Guard against locking yourself (possibly the last admin) out.
+  if (userId === me.userId) redirect(`/admin/students/${userId}?error=self`);
+  await auth.api.setRole({ body: { userId, role }, headers: await headers() });
+  revalidatePath("/admin/students");
+  revalidatePath(`/admin/students/${userId}`);
+  redirect(`/admin/students/${userId}?saved=1`);
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -101,6 +102,9 @@ function parseCourseForm(formData: FormData) {
     tags: String(formData.get("tags") ?? "").split(",").map((t) => t.trim()).filter(Boolean),
     validityDays: Number(formData.get("validityDays") ?? 0) || 0,
     certificate: formData.get("certificate") === "on",
+    metaTitle: String(formData.get("metaTitle") ?? "").trim().slice(0, 70),
+    metaDescription: String(formData.get("metaDescription") ?? "").trim().slice(0, 180),
+    faqs: pairs(formData, "faqs", "question", "answer").filter((f) => f.question && f.answer),
     curriculum: parseCurriculum(formData.get("curriculum")),
     materials: lines(formData.get("materials")).map((l) => {
       const [label, ...rest] = l.split("|");
@@ -176,6 +180,33 @@ export async function saveCourseAction(formData: FormData) {
   }
   revalidateCoursePages(data.slug);
   redirect("/admin/courses?saved=1");
+}
+
+/**
+ * Creates full SEO-ready course pages from the blueprints in
+ * lib/seo/course-blueprints.ts. Existing slugs are never overwritten, and fee,
+ * batch dates and trainer are left blank for an admin to fill in.
+ */
+export async function generateCoursesAction(formData: FormData) {
+  await requireAdmin();
+  if (!isDbConfigured()) redirect("/admin/courses/generate?error=nodb");
+  const slugs = new Set(formData.getAll("slugs").map(String));
+  if (slugs.size === 0) redirect("/admin/courses/generate?error=empty");
+
+  await connectDb();
+  let created = 0;
+  let skipped = 0;
+  for (const bp of COURSE_BLUEPRINTS.filter((b) => slugs.has(b.slug))) {
+    if (await CourseModel.exists({ slug: bp.slug })) {
+      skipped++;
+      continue;
+    }
+    await CourseModel.create(buildCourseFromBlueprint(bp));
+    revalidateCoursePages(bp.slug);
+    created++;
+  }
+  revalidatePath("/sitemap.xml");
+  redirect(`/admin/courses?generated=${created}&skipped=${skipped}`);
 }
 
 export async function deleteCourseAction(formData: FormData) {

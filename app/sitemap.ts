@@ -42,6 +42,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const coursePages = courses.map((c) => ({
     url: `${site.url}/courses/${c.slug}`,
+    lastModified: c.updatedAt ? new Date(c.updatedAt) : undefined,
     changeFrequency: "weekly" as const,
     priority: 0.9,
   }));
@@ -50,6 +51,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${site.url}/courses/category/${cat}`,
     changeFrequency: "weekly" as const,
     priority: 0.8,
+  }));
+
+  // Tag pages are real landing pages for long-tail searches ("spring boot course").
+  const courseTagPages = [...new Set(courses.flatMap((c) => c.tags ?? []))].map((tag) => ({
+    url: `${site.url}/courses/tag/${slugify(tag)}`,
+    changeFrequency: "weekly" as const,
+    priority: 0.6,
   }));
 
   const blogPages = posts.map((p) => ({
@@ -63,6 +71,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${site.url}/blog/category/${cat}`,
     changeFrequency: "weekly" as const,
     priority: 0.5,
+  }));
+
+  const blogTagPages = [...new Set(posts.flatMap((p) => p.tags ?? []))].map((tag) => ({
+    url: `${site.url}/blog/tag/${slugify(tag)}`,
+    changeFrequency: "monthly" as const,
+    priority: 0.4,
   }));
 
   const trainerPages = trainers.map((t) => ({
@@ -80,8 +94,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...landingPages,
     ...coursePages,
     ...categoryPages,
+    ...courseTagPages,
     ...blogPages,
     ...blogCategoryPages,
+    ...blogTagPages,
     ...trainerPages,
   ];
 }

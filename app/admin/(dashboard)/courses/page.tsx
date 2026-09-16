@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,7 @@ import { formatInr } from "@/components/site/course-card";
 import { courses as staticCourses } from "@/lib/data/courses";
 import { connectDb, isDbConfigured } from "@/lib/db";
 import { CourseModel } from "@/lib/models/course";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Courses" };
 
@@ -62,7 +63,8 @@ async function getRows(): Promise<{ rows: Row[]; dbReady: boolean }> {
 }
 
 export default async function AdminCoursesPage({ searchParams }: PageProps<"/admin/courses">) {
-  const { error, saved, deleted } = await searchParams;
+  await requireAdmin();
+  const { error, saved, deleted, generated, skipped } = await searchParams;
   const { rows, dbReady } = await getRows();
 
   return (
@@ -74,11 +76,18 @@ export default async function AdminCoursesPage({ searchParams }: PageProps<"/adm
             {rows.length} courses live on the website
           </p>
         </div>
-        <Button asChild className="bg-teal text-white hover:bg-teal/90">
-          <Link href="/admin/courses/new">
-            <Plus className="size-4" aria-hidden /> Add Course
-          </Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <Link href="/admin/courses/generate">
+              <Sparkles className="size-4" aria-hidden /> Generate course pages
+            </Link>
+          </Button>
+          <Button asChild className="bg-teal text-white hover:bg-teal/90">
+            <Link href="/admin/courses/new">
+              <Plus className="size-4" aria-hidden /> Add Course
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {saved && (
@@ -89,6 +98,12 @@ export default async function AdminCoursesPage({ searchParams }: PageProps<"/adm
       {deleted && (
         <p className="mt-4 rounded-lg border border-teal/30 bg-teal/5 p-3 text-sm text-teal">
           Course deleted.
+        </p>
+      )}
+      {generated && (
+        <p className="mt-4 rounded-lg border border-teal/30 bg-teal/5 p-3 text-sm text-teal">
+          Generated {generated} course page{generated === "1" ? "" : "s"}
+          {Number(skipped) > 0 ? `, skipped ${skipped} that already existed` : ""}. Add the fee, next batch and trainer to each one, then they&apos;re ready to promote.
         </p>
       )}
       {error === "nodb" && (

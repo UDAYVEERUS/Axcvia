@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { FaqForm } from "@/components/admin/faq-form";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Add FAQ" };
 
 export default async function NewFaqPage({ searchParams }: PageProps<"/admin/faqs/new">) {
+  await requireAdmin();
   const { error } = await searchParams;
   return (
     <div>

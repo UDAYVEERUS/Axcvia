@@ -1,67 +1,59 @@
+import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { loginAction, registerAction } from "@/app/student-actions";
+import { Award, ClipboardList, PlayCircle, ShieldCheck } from "lucide-react";
+import { GoogleSignInButton } from "@/components/site/google-sign-in-button";
 
+// Better Auth appends `?error=<code>` to the error callback URL.
 const messages: Record<string, string> = {
-  invalid: "Incorrect email or password.",
-  exists: "An account with this email already exists — log in instead.",
-  password: "Password must be at least 8 characters.",
-  nodb: "Accounts are not available yet — the database is not connected.",
-  server: "Something went wrong on our side. Please try again in a moment, or call us.",
+  access_denied: "Google sign-in was cancelled.",
+  account_not_linked: "This email is already linked to a different sign-in method. Please contact us.",
+  banned: "This account has been suspended. Please contact us.",
 };
 
-export function AuthCard({ mode, next, error }: { mode: "login" | "register"; next: string; error?: string }) {
-  const isLogin = mode === "login";
+export function AuthCard({ next, error, configured }: { next: string; error?: string; configured: boolean }) {
+  const errorText = error ? (messages[error] ?? "Google sign-in didn't complete. Please try again.") : "";
   return (
-    <section className="mx-auto flex max-w-md flex-col px-4 pb-20 pt-32 sm:px-6">
-      <h1 className="text-3xl font-extrabold tracking-tight text-navy">{isLogin ? "Welcome back" : "Create your student account"}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {isLogin ? "Sign in to access your courses, mock tests and certificates." : "One account for all your courses, recordings, mock test results and certificates."}
-      </p>
-      {error && messages[error] && (
-        <p role="alert" className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">{messages[error]}</p>
-      )}
-      <form action={isLogin ? loginAction : registerAction} className="mt-6 space-y-4 rounded-xl border bg-card p-6 shadow-sm">
-        <input type="hidden" name="next" value={next} />
-        {!isLogin && (
-          <div className="space-y-2">
-            <Label htmlFor="name">Full name</Label>
-            <Input id="name" name="name" required autoComplete="name" />
-          </div>
-        )}
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" type="email" required autoComplete="email" />
-        </div>
-        {!isLogin && (
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="+91 XXXXX XXXXX" />
-          </div>
-        )}
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input id="password" name="password" type="password" required minLength={8} autoComplete={isLogin ? "current-password" : "new-password"} />
-          {!isLogin && <p className="text-xs text-muted-foreground">At least 8 characters.</p>}
-        </div>
-        <Button type="submit" size="lg" className="w-full bg-teal text-white hover:bg-teal/90">
-          {isLogin ? "Sign in" : "Create account"}
-        </Button>
-      </form>
-      <p className="mt-4 text-center text-sm text-muted-foreground">
-        {isLogin ? "Don't have an account? " : "Already registered? "}
-        <Link href={`${isLogin ? "/register" : "/login"}?next=${encodeURIComponent(next)}`} className="font-medium text-teal hover:underline">
-          {isLogin ? "Register now" : "Sign in"}
-        </Link>
-      </p>
-      {isLogin && (
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          Forgot your password? Call us at {" "}
-          <a href="tel:+919196005457" className="underline">+91 91960 05457</a> and we&apos;ll reset it for you.
+    <section className="mx-auto flex min-h-[80vh] max-w-md flex-col justify-center px-4 pb-16 pt-28 sm:px-6">
+      <div className="rounded-2xl border bg-card p-6 shadow-xl shadow-navy/5 sm:p-8">
+        <Image src="/logo.png" alt="Axcvia" width={608} height={410} className="mx-auto h-14 w-auto" />
+        <h1 className="mt-5 text-center text-2xl font-extrabold text-navy">Sign in to Axcvia</h1>
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          One account for your courses, recordings, mock test results and certificates. New here? Signing in creates your account.
         </p>
-      )}
+
+        {errorText && (
+          <p role="alert" className="mt-5 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+            {errorText}
+          </p>
+        )}
+        {!configured && (
+          <p className="mt-5 rounded-lg border bg-secondary p-3 text-sm text-muted-foreground">
+            Sign-in isn&apos;t available yet — Google sign-in hasn&apos;t been configured on this server.
+          </p>
+        )}
+
+        <div className="mt-6">
+          <GoogleSignInButton
+            callbackURL={next}
+            errorCallbackURL={`/login?next=${encodeURIComponent(next)}`}
+            disabled={!configured}
+          />
+        </div>
+
+        <ul className="mt-6 space-y-2.5 border-t pt-5 text-sm text-foreground/80">
+          <li className="flex items-center gap-2.5"><PlayCircle className="size-4 text-teal" aria-hidden /> Live classes and recordings in one place</li>
+          <li className="flex items-center gap-2.5"><ClipboardList className="size-4 text-teal" aria-hidden /> Mock test scores and explanations</li>
+          <li className="flex items-center gap-2.5"><Award className="size-4 text-teal" aria-hidden /> Downloadable certificates</li>
+        </ul>
+      </div>
+      <p className="mt-4 flex items-start justify-center gap-1.5 text-center text-xs text-muted-foreground">
+        <ShieldCheck className="size-3.5 shrink-0 translate-y-px text-teal" aria-hidden />
+        <span>
+          We never see your Google password. By continuing you agree to our{" "}
+          <Link href="/terms-of-service" className="underline hover:text-navy">Terms</Link> and{" "}
+          <Link href="/privacy-policy" className="underline hover:text-navy">Privacy Policy</Link>.
+        </span>
+      </p>
     </section>
   );
 }

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { BlogForm } from "@/components/admin/blog-form";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Add Blog Post" };
 
 export default async function NewBlogPage({ searchParams }: PageProps<"/admin/blog/new">) {
+  await requireAdmin();
   const { error } = await searchParams;
   return (
     <div>

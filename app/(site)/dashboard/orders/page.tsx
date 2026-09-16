@@ -3,14 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { formatInr } from "@/components/site/course-card";
 import { connectDb, isDbConfigured } from "@/lib/db";
 import { OrderModel } from "@/lib/models/order";
-import { getCurrentStudent } from "@/lib/student/auth";
+import { requireStudent } from "@/lib/student/auth";
 
 export const metadata: Metadata = { title: "Orders", robots: { index: false } };
 
 const style: Record<string, string> = { paid: "bg-teal/10 text-teal", pending: "bg-gold/15 text-gold-deep", failed: "bg-destructive/10 text-destructive", cancelled: "bg-muted text-muted-foreground" };
 
 export default async function OrdersPage() {
-  const student = (await getCurrentStudent())!;
+  const student = await requireStudent("/dashboard/orders");
   /* eslint-disable @typescript-eslint/no-explicit-any */
   let orders: any[] = [];
   if (isDbConfigured()) {

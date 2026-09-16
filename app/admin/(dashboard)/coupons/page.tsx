@@ -11,10 +11,12 @@ import { connectDb, isDbConfigured } from "@/lib/db";
 import { CouponModel } from "@/lib/models/coupon";
 import { coupons as seed } from "@/lib/data/lms";
 import { toCoupon } from "@/lib/services/lms";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Coupons" };
 
 export default async function CouponsPage({ searchParams }: PageProps<"/admin/coupons">) {
+  await requireAdmin();
   const { saved, deleted, error } = await searchParams;
   /* eslint-disable @typescript-eslint/no-explicit-any */
   type Row = (typeof seed)[number] & { uses: number; source: "seed" | "database" };

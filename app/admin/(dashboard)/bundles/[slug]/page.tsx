@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { BundleForm } from "@/components/admin/bundle-form";
 import { getBundleBySlug } from "@/lib/services/lms";
 import { bundles as seed } from "@/lib/data/lms";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Edit Bundle" };
 
 export default async function Page({ params, searchParams }: PageProps<"/admin/bundles/[slug]">) {
+  await requireAdmin();
   const { slug } = await params;
   const { error } = await searchParams;
   const item = await getBundleBySlug(slug);

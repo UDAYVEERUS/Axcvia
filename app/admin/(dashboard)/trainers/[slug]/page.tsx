@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { TrainerForm } from "@/components/admin/trainer-form";
 import { getTrainerBySlug } from "@/lib/services/trainers";
 import { trainers as seed } from "@/lib/data/people";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Edit Trainer" };
 
 export default async function EditTrainerPage({ params, searchParams }: PageProps<"/admin/trainers/[slug]">) {
+  await requireAdmin();
   const { slug } = await params;
   const { error } = await searchParams;
   const item = await getTrainerBySlug(slug);

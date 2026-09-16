@@ -84,6 +84,13 @@ export interface Course {
   nextBatch: string;
   /** Cover image URL (Unsplash or uploaded); empty string falls back to a gradient. */
   image: string;
+  /** Shown on the course page and published as FAQPage structured data. */
+  faqs?: { question: string; answer: string }[];
+  /** Search-result title/description overrides; fall back to title/tagline. */
+  metaTitle?: string;
+  metaDescription?: string;
+  /** ISO date of the last edit — published as `dateModified`. */
+  updatedAt?: string;
 }
 
 export interface Trainer {

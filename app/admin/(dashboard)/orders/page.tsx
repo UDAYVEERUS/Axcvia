@@ -7,12 +7,14 @@ import { formatInr } from "@/components/site/course-card";
 import { updateOrderStatusAction } from "@/app/admin/actions";
 import { connectDb, isDbConfigured } from "@/lib/db";
 import { OrderModel } from "@/lib/models/order";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Orders" };
 
 const style: Record<string, string> = { paid: "bg-teal/10 text-teal", pending: "bg-gold/15 text-gold-deep", failed: "bg-destructive/10 text-destructive", cancelled: "bg-muted text-muted-foreground" };
 
 export default async function OrdersPage() {
+  await requireAdmin();
   /* eslint-disable @typescript-eslint/no-explicit-any */
   let orders: any[] = [];
   let dbReady = false;

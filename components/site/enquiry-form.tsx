@@ -19,14 +19,23 @@ export function EnquiryForm({
   courseOptions,
   defaultCourse,
   heading = "Get a Free Career Consultation",
+  subheading,
   buttonLabel = "Request Callback",
+  idPrefix,
+  compact = false,
 }: {
   source: string;
   courseOptions: { title: string; slug: string }[];
   defaultCourse?: string;
   heading?: string;
+  subheading?: string;
   buttonLabel?: string;
+  /** Needed when the same form renders twice on a page (e.g. mobile + desktop layouts). */
+  idPrefix?: string;
+  /** Name, phone and course only — for the popup, where fewer fields convert better. */
+  compact?: boolean;
 }) {
+  const idBase = idPrefix ?? source;
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [error, setError] = useState("");
   const [courseInterest, setCourseInterest] = useState(defaultCourse ?? "");
@@ -83,19 +92,22 @@ export function EnquiryForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-xl border bg-card p-6 shadow-sm sm:p-8"
+      className={compact ? "space-y-4" : "space-y-4 rounded-xl border bg-card p-6 shadow-sm sm:p-8"}
       aria-label={heading}
     >
-      <p className="text-lg font-semibold text-navy">{heading}</p>
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div>
+        <p className="text-lg font-semibold text-navy">{heading}</p>
+        {subheading && <p className="mt-1 text-sm text-muted-foreground">{subheading}</p>}
+      </div>
+      <div className={compact ? "space-y-4" : "grid gap-4 sm:grid-cols-2"}>
         <div className="space-y-2">
-          <Label htmlFor={`${source}-name`}>Full Name *</Label>
-          <Input id={`${source}-name`} name="name" required placeholder="Your name" autoComplete="name" />
+          <Label htmlFor={`${idBase}-name`}>Full Name *</Label>
+          <Input id={`${idBase}-name`} name="name" required placeholder="Your name" autoComplete="name" />
         </div>
         <div className="space-y-2">
-          <Label htmlFor={`${source}-phone`}>Phone *</Label>
+          <Label htmlFor={`${idBase}-phone`}>Phone *</Label>
           <Input
-            id={`${source}-phone`}
+            id={`${idBase}-phone`}
             name="phone"
             type="tel"
             required
@@ -104,14 +116,16 @@ export function EnquiryForm({
           />
         </div>
       </div>
+      {!compact && (
+        <div className="space-y-2">
+          <Label htmlFor={`${idBase}-email`}>Email</Label>
+          <Input id={`${idBase}-email`} name="email" type="email" placeholder="you@example.com" autoComplete="email" />
+        </div>
+      )}
       <div className="space-y-2">
-        <Label htmlFor={`${source}-email`}>Email</Label>
-        <Input id={`${source}-email`} name="email" type="email" placeholder="you@example.com" autoComplete="email" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor={`${source}-course`}>Course of Interest</Label>
+        <Label htmlFor={`${idBase}-course`}>Course of Interest</Label>
         <Select value={courseInterest} onValueChange={setCourseInterest}>
-          <SelectTrigger id={`${source}-course`} className="w-full">
+          <SelectTrigger id={`${idBase}-course`} className="w-full">
             <SelectValue placeholder="Select a course" />
           </SelectTrigger>
           <SelectContent>
@@ -124,10 +138,12 @@ export function EnquiryForm({
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor={`${source}-message`}>Message (optional)</Label>
-        <Textarea id={`${source}-message`} name="message" placeholder="Tell us about your background or goals" rows={3} />
-      </div>
+      {!compact && (
+        <div className="space-y-2">
+          <Label htmlFor={`${idBase}-message`}>Message (optional)</Label>
+          <Textarea id={`${idBase}-message`} name="message" placeholder="Tell us about your background or goals" rows={3} />
+        </div>
+      )}
       {status === "error" && (
         <p role="alert" className="text-sm font-medium text-destructive">{error}</p>
       )}

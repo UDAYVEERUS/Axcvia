@@ -4,14 +4,14 @@ import { ArrowRight, Clock, Lock, PlayCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { courseLessons, getAllCourses } from "@/lib/services/courses";
-import { getCurrentStudent } from "@/lib/student/auth";
+import { requireStudent } from "@/lib/student/auth";
 import { getStudentEnrollments, isActive } from "@/lib/student/enrollments";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "My Courses", robots: { index: false } };
 
 export default async function DashboardHome() {
-  const student = (await getCurrentStudent())!;
+  const student = await requireStudent("/dashboard");
   const [enrollments, courses] = await Promise.all([getStudentEnrollments(student.id), getAllCourses()]);
 
   if (enrollments.length === 0) {

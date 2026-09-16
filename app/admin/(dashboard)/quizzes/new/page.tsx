@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { QuizForm } from "@/components/admin/quiz-form";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Add Quiz" };
 
 export default async function Page({ searchParams }: PageProps<"/admin/quizzes/new">) {
+  await requireAdmin();
   const { error } = await searchParams;
   return (
     <div>

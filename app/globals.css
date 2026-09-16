@@ -7,15 +7,19 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-navy: #102a43;
-  --color-navy-deep: #0b1d2e;
-  --color-teal: #00a6a6;
-  --color-teal-bright: #22d3ee;
-  --color-gold: oklch(0.8 0.13 85);
-  --color-gold-deep: oklch(0.7 0.14 78);
-  --font-sans: "Geist", "Geist Fallback", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback", ui-monospace, monospace;
-  --font-heading: var(--font-sans);
+  /* Brand palette — taken from the Axcvia logo (royal navy + cyan).
+     `teal` is the logo cyan darkened just enough for white text to pass WCAG AA;
+     `teal-bright` is the logo cyan itself, for accents on dark backgrounds.
+     `gold` is a warm amber used sparingly for ratings, offers and "featured". */
+  --color-navy: #0f2c5c;
+  --color-navy-deep: #0a1d40;
+  --color-teal: #0a7ea4;
+  --color-teal-bright: #22c3e0;
+  --color-gold: #f4a524;
+  --color-gold-deep: #b45309;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-heading: var(--font-jakarta), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -56,21 +60,21 @@
 
 :root {
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.035 260);
+  --card-foreground: oklch(0.22 0.04 262);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.035 260);
-  --primary: #102a43;
+  --popover-foreground: oklch(0.22 0.04 262);
+  --primary: #0f2c5c;
   --primary-foreground: oklch(0.985 0.005 240);
-  --secondary: oklch(0.955 0.015 200);
-  --secondary-foreground: oklch(0.35 0.06 210);
-  --muted: oklch(0.965 0.006 240);
-  --muted-foreground: oklch(0.5 0.03 255);
-  --accent: oklch(0.95 0.02 195);
-  --accent-foreground: oklch(0.32 0.06 210);
+  --secondary: oklch(0.965 0.012 235);
+  --secondary-foreground: oklch(0.32 0.06 255);
+  --muted: oklch(0.967 0.006 250);
+  --muted-foreground: oklch(0.47 0.03 258);
+  --accent: oklch(0.955 0.02 225);
+  --accent-foreground: oklch(0.3 0.07 255);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.915 0.01 245);
-  --input: oklch(0.915 0.01 245);
-  --ring: #00a6a6;
+  --border: oklch(0.912 0.012 250);
+  --input: oklch(0.88 0.014 250);
+  --ring: #0a7ea4;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -85,8 +89,8 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --background: oklch(0.995 0.002 240);
-  --foreground: oklch(0.24 0.035 260);
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.22 0.04 262);
 }
 
 .dark {
@@ -144,5 +148,12 @@
   }
   html {
     @apply font-sans;
+    -webkit-tap-highlight-color: transparent;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading tracking-tight;
   }
 }

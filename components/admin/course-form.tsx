@@ -213,6 +213,33 @@ export async function CourseForm({
         <p className="text-xs text-muted-foreground">Upload PDFs to Cloudinary or Google Drive and paste the link. Only enrolled students can download.</p>
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="faqs">FAQs (one per line: Question | Answer)</Label>
+        <Textarea
+          id="faqs"
+          name="faqs"
+          rows={5}
+          defaultValue={(course?.faqs ?? []).map((f) => `${f.question} | ${f.answer}`).join("\n")}
+          placeholder={"Do I need a degree to join? | No — the beginner track starts from the basics.\nAre sessions recorded? | Yes, every live class is recorded and added to your dashboard."}
+        />
+        <p className="text-xs text-muted-foreground">
+          Shown on the course page and sent to Google/AI answers as FAQ structured data. Answer in one or two plain sentences.
+        </p>
+      </div>
+
+      <fieldset className="space-y-4 rounded-xl border bg-secondary/30 p-4">
+        <legend className="px-1 text-sm font-semibold text-navy">Search engine listing (optional)</legend>
+        <div className="space-y-2">
+          <Label htmlFor="metaTitle">Meta title</Label>
+          <Input id="metaTitle" name="metaTitle" maxLength={70} defaultValue={course?.metaTitle} placeholder="Leave empty to use the course title" />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="metaDescription">Meta description</Label>
+          <Textarea id="metaDescription" name="metaDescription" rows={2} maxLength={180} defaultValue={course?.metaDescription} placeholder="Leave empty to build one from the tagline, duration and fee" />
+          <p className="text-xs text-muted-foreground">Around 150 characters. Lead with what the student gets.</p>
+        </div>
+      </fieldset>
+
       <div className="flex flex-wrap gap-6 text-sm">
         <label className="flex items-center gap-2">
           <input type="checkbox" name="certificate" defaultChecked={course?.certificate !== false} className="size-4 accent-teal" />

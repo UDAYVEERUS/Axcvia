@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { TrainerForm } from "@/components/admin/trainer-form";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Add Trainer" };
 
 export default async function NewTrainerPage({ searchParams }: PageProps<"/admin/trainers/new">) {
+  await requireAdmin();
   const { error } = await searchParams;
   return (
     <div>

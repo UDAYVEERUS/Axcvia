@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { BlogForm } from "@/components/admin/blog-form";
 import { getPostBySlug } from "@/lib/services/blog";
 import { blogPosts as seed } from "@/lib/data/blog";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Edit Blog Post" };
 
 export default async function EditBlogPage({ params, searchParams }: PageProps<"/admin/blog/[slug]">) {
+  await requireAdmin();
   const { slug } = await params;
   const { error } = await searchParams;
   const item = await getPostBySlug(slug);

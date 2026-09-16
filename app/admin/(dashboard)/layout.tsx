@@ -39,7 +39,7 @@ const navItems = [
   { href: "/admin/bundles", label: "Bundles", icon: Layers },
   { href: "/admin/pages", label: "Landing Pages", icon: FileText },
   { href: "/admin/orders", label: "Orders", icon: Receipt },
-  { href: "/admin/students", label: "Students", icon: Users },
+  { href: "/admin/students", label: "Users", icon: Users },
   { href: "/admin/coupons", label: "Coupons", icon: TicketPercent },
   { href: "/admin/blog", label: "Blog", icon: Newspaper },
   { href: "/admin/trainers", label: "Trainers", icon: GraduationCap },
@@ -52,7 +52,9 @@ const navItems = [
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin();
+  // UX gate only — each page and Server Action runs its own requireAdmin(),
+  // because layouts don't re-run on client navigation.
+  const admin = await requireAdmin();
 
   return (
     <div className="flex min-h-screen">
@@ -77,6 +79,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           ))}
         </nav>
         <div className="space-y-1 border-t border-white/10 p-3">
+          <p className="truncate px-3 pb-1 text-xs text-white/50" title={admin.email}>
+            Signed in as {admin.email}
+          </p>
           <Link
             href="/"
             className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium hover:bg-white/10 hover:text-white"
@@ -96,7 +101,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
       <div className="min-w-0 flex-1 bg-secondary/30">
         {/* Mobile top bar */}
-        <div className="flex items-center justify-between border-b bg-card px-4 py-3 md:hidden">
+        <div className="flex items-center justify-between gap-2 border-b bg-card px-4 py-3 md:hidden">
           <span className="font-bold text-navy">Axcvia Admin</span>
           <div className="flex gap-1 overflow-x-auto">
             {navItems.map((item) => (
@@ -104,6 +109,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                 <Link href={item.href}>{item.label}</Link>
               </Button>
             ))}
+            <form action={logoutAction}>
+              <Button type="submit" variant="ghost" size="sm">Sign Out</Button>
+            </form>
           </div>
         </div>
         <div className="mx-auto max-w-6xl p-4 sm:p-8">{children}</div>

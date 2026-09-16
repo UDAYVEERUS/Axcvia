@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { FaqForm } from "@/components/admin/faq-form";
 import { getAllFaqs } from "@/lib/services/faqs";
 import { faqs as seed } from "@/lib/data/people";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Edit FAQ" };
 
 export default async function EditFaqPage({ params, searchParams }: PageProps<"/admin/faqs/[slug]">) {
+  await requireAdmin();
   const { slug } = await params;
   const { error } = await searchParams;
   const item = (await getAllFaqs()).find((i) => i.slug === slug);

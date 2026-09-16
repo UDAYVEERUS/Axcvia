@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { CourseForm } from "@/components/admin/course-form";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Add Course" };
 
 export default async function NewCoursePage({
   searchParams,
 }: PageProps<"/admin/courses/new">) {
+  await requireAdmin();
   const { error } = await searchParams;
   return (
     <div>

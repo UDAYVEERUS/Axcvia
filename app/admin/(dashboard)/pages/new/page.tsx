@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { LandingPageForm } from "@/components/admin/landing-page-form";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Add Landing Page" };
 
 export default async function Page({ searchParams }: PageProps<"/admin/pages/new">) {
+  await requireAdmin();
   const { error } = await searchParams;
   return (
     <div>

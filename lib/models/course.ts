@@ -45,6 +45,11 @@ const courseSchema = new Schema(
     title: { type: String, required: true, trim: true, maxlength: 120 },
     slug: { type: String, required: true, unique: true, trim: true, lowercase: true },
     category: { type: String, required: true, trim: true, maxlength: 60 },
+    // Search/AI-answer surface: per-course FAQs (rendered + FAQPage schema) and
+    // optional meta overrides. Empty meta falls back to title/tagline.
+    faqs: { type: [{ question: { type: String, trim: true }, answer: { type: String, trim: true } }], default: [] },
+    metaTitle: { type: String, trim: true, maxlength: 70, default: "" },
+    metaDescription: { type: String, trim: true, maxlength: 180, default: "" },
     tagline: { type: String, trim: true, maxlength: 200, default: "" },
     description: { type: String, trim: true, maxlength: 5000, default: "" },
     syllabus: { type: [syllabusModuleSchema], default: [] },

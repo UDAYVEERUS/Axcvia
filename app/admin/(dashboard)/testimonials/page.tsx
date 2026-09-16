@@ -10,10 +10,12 @@ import { testimonials as seed } from "@/lib/data/people";
 import { TestimonialModel } from "@/lib/models/testimonial";
 import { loadForAdmin } from "@/lib/services/content";
 import { toTestimonial } from "@/lib/services/testimonials";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Testimonials" };
 
 export default async function AdminTestimonialsPage({ searchParams }: PageProps<"/admin/testimonials">) {
+  await requireAdmin();
   const flash = await searchParams;
   const { rows, dbReady } = await loadForAdmin(seed, TestimonialModel, toTestimonial);
 

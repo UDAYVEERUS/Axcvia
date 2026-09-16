@@ -1,8 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { connectDb, isDbConfigured } from "@/lib/db";
 import { EnrollmentModel } from "@/lib/models/enrollment";
 import { OrderModel } from "@/lib/models/order";
@@ -11,83 +12,28 @@ import { StudentModel } from "@/lib/models/student";
 import { createRazorpayOrder, isRazorpayConfigured } from "@/lib/payments/razorpay";
 import { courseLessons, getCourseBySlug } from "@/lib/services/courses";
 import { getQuizBySlug } from "@/lib/services/lms";
-import {
-  checkPassword,
-  clearStudentSession,
-  getCurrentStudent,
-  hashPassword,
-  requireStudent,
-  setStudentSession,
-} from "@/lib/student/auth";
+import { getCurrentStudent, requireStudent, safeNext } from "@/lib/student/auth";
 import { getAccess, grantEnrollment } from "@/lib/student/enrollments";
 import { applyCoupon, fulfilOrder, priceCart, reservePendingEnrollments, type CartLine } from "@/lib/student/orders";
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Every action below re-verifies the caller: Server Actions are reachable by
+// direct POST, so a page or layout having checked is not enough.
+
 const text = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
 
-function safeNext(next: string) {
-  return next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
-}
-
 // ---------- auth ----------
-
-export async function registerAction(formData: FormData) {
-  const name = text(formData, "name").slice(0, 100);
-  const email = text(formData, "email").toLowerCase().slice(0, 100);
-  const phone = text(formData, "phone").slice(0, 20);
-  const password = String(formData.get("password") ?? "");
-  const next = safeNext(text(formData, "next"));
-  const back = `/register?next=${encodeURIComponent(next)}`;
-
-  if (!isDbConfigured()) redirect(`${back}&error=nodb`);
-  if (!name || !EMAIL_RE.test(email)) redirect(`${back}&error=invalid`);
-  if (password.length < 8) redirect(`${back}&error=password`);
-
-  // Grab the cookie store before any DB await so it's available regardless of
-  // how the runtime propagates request context across external I/O.
-  const store = await cookies();
-  let userId = "";
-  let exists = false;
-  try {
-    await connectDb();
-    exists = Boolean(await StudentModel.exists({ email }));
-    if (!exists) {
-      const doc = await StudentModel.create({ name, email, phone, passwordHash: hashPassword(password) });
-      userId = String(doc._id);
-    }
-  } catch (err) {
-    console.error("[student-action] register failed:", err);
-    redirect(`${back}&error=server`);
-  }
-  if (exists) redirect(`${back}&error=exists`);
-  await setStudentSession(userId, store);
-  redirect(next);
-}
-
-export async function loginAction(formData: FormData) {
-  const email = text(formData, "email").toLowerCase();
-  const password = String(formData.get("password") ?? "");
-  const next = safeNext(text(formData, "next"));
-  const back = `/login?next=${encodeURIComponent(next)}`;
-  if (!isDbConfigured()) redirect(`${back}&error=nodb`);
-  const store = await cookies();
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  let doc: any = null;
-  try {
-    await connectDb();
-    doc = await StudentModel.findOne({ email }).lean();
-  } catch (err) {
-    console.error("[student-action] login failed:", err);
-    redirect(`${back}&error=server`);
-  }
-  if (!doc || !checkPassword(password, doc.passwordHash)) redirect(`${back}&error=invalid`);
-  await setStudentSession(String(doc._id), store);
-  redirect(next);
-}
+// Sign-in is Google OAuth through Better Auth (/api/auth/*). There are no passwords.
 
 export async function logoutStudentAction() {
-  await clearStudentSession();
+  await auth.api.signOut({ headers: await headers() }).catch(() => null);
   redirect("/");
+}
+
+/** Revokes every session for this account (all devices), including this one. */
+export async function signOutEverywhereAction() {
+  await requireStudent("/dashboard/profile");
+  await auth.api.revokeSessions({ headers: await headers() });
+  redirect("/login");
 }
 
 export async function updateProfileAction(formData: FormData) {
@@ -97,20 +43,7 @@ export async function updateProfileAction(formData: FormData) {
   if (!name) redirect("/dashboard/profile?error=invalid");
   await connectDb();
   await StudentModel.findByIdAndUpdate(student.id, { name, phone });
-  revalidatePath("/dashboard/profile");
-  redirect("/dashboard/profile?saved=1");
-}
-
-export async function changePasswordAction(formData: FormData) {
-  const student = await requireStudent("/dashboard/profile");
-  const current = String(formData.get("current") ?? "");
-  const password = String(formData.get("password") ?? "");
-  if (password.length < 8) redirect("/dashboard/profile?error=password");
-  await connectDb();
-  const doc: any = await StudentModel.findById(student.id);
-  if (!doc || !checkPassword(current, doc.passwordHash)) redirect("/dashboard/profile?error=current");
-  doc.passwordHash = hashPassword(password);
-  await doc.save();
+  revalidatePath("/dashboard", "layout");
   redirect("/dashboard/profile?saved=1");
 }
 
@@ -118,9 +51,11 @@ export async function changePasswordAction(formData: FormData) {
 
 export async function toggleWishlistAction(formData: FormData) {
   const slug = text(formData, "slug");
-  const back = text(formData, "back") || `/courses/${slug}`;
+  const back = safeNext(text(formData, "back"), `/courses/${slug}`);
   const student = await getCurrentStudent();
   if (!student) redirect(`/login?next=${encodeURIComponent(back)}`);
+  const course = await getCourseBySlug(slug);
+  if (!course) redirect(back);
   await connectDb();
   const has = student.wishlist.includes(slug);
   await StudentModel.findByIdAndUpdate(student.id, has ? { $pull: { wishlist: slug } } : { $addToSet: { wishlist: slug } });
@@ -136,7 +71,9 @@ export async function enrollFreeAction(formData: FormData) {
   const student = await getCurrentStudent();
   if (!student) redirect(`/login?next=${encodeURIComponent(`/courses/${slug}`)}`);
   const course = await getCourseBySlug(slug);
-  if (!course || course.discountFee > 0) redirect(`/courses/${slug}`);
+  // Free enrollment is for webinars only — a paid course whose fee isn't set yet
+  // must never be claimable for ₹0.
+  if (!course || course.discountFee > 0 || course.type !== "webinar") redirect(`/courses/${slug}`);
   await grantEnrollment({
     userId: student.id, name: student.name, email: student.email, phone: student.phone,
     courseSlug: course.slug, courseTitle: course.title, validityDays: course.validityDays ?? 0,
@@ -156,16 +93,19 @@ export async function completeLessonAction(formData: FormData) {
   const [course, access] = await Promise.all([getCourseBySlug(courseSlug), getAccess(student.id, courseSlug)]);
   if (!course || !access) redirect(`/courses/${courseSlug}`);
 
+  const lessonIds = courseLessons(course).map((l) => l.id);
+  if (!lessonIds.includes(lessonId)) redirect(`/learn/${courseSlug}`);
+
   await connectDb();
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const doc: any = await EnrollmentModel.findById(access.id);
   if (!doc.completedLessons.includes(lessonId)) doc.completedLessons.push(lessonId);
-  const all = courseLessons(course).map((l) => l.id);
-  const done = all.every((id) => doc.completedLessons.includes(id));
+  const done = lessonIds.every((id) => doc.completedLessons.includes(id));
   if (done && course.certificate !== false && !doc.certificateIssuedAt) doc.certificateIssuedAt = new Date();
   await doc.save();
   revalidatePath(`/learn/${courseSlug}`);
   revalidatePath("/dashboard");
-  redirect(nextId ? `/learn/${courseSlug}/${nextId}` : `/learn/${courseSlug}`);
+  redirect(nextId && lessonIds.includes(nextId) ? `/learn/${courseSlug}/${nextId}` : `/learn/${courseSlug}`);
 }
 
 // ---------- quizzes ----------
@@ -188,36 +128,40 @@ export async function submitQuizAction(input: {
 }): Promise<QuizResult | { error: string }> {
   const student = await getCurrentStudent();
   if (!student) return { error: "Please sign in to submit the test." };
-  const quiz = await getQuizBySlug(input.quizSlug);
+  const quiz = await getQuizBySlug(String(input?.quizSlug ?? ""));
   if (!quiz) return { error: "Quiz not found." };
   if (!quiz.isFreeSample) {
     const access = quiz.courseSlug ? await getAccess(student.id, quiz.courseSlug) : null;
     if (!access) return { error: "You are not enrolled in this test series." };
   }
-  const order = input.order.filter((i) => Number.isInteger(i) && i >= 0 && i < quiz.questions.length);
+  const rawOrder = Array.isArray(input.order) ? input.order : [];
+  const rawAnswers = Array.isArray(input.answers) ? input.answers : [];
+  const order = [...new Set(rawOrder.filter((i) => Number.isInteger(i) && i >= 0 && i < quiz.questions.length))];
+  const answers = order.map((_, i) => (Number.isInteger(rawAnswers[i]) ? rawAnswers[i] : -1));
   const total = quiz.questions.length;
   let score = 0;
   order.forEach((qIndex, i) => {
-    if (input.answers[i] === quiz.questions[qIndex].correctIndex) score++;
+    if (answers[i] === quiz.questions[qIndex].correctIndex) score++;
   });
   const percent = total ? Math.round((score / total) * 100) : 0;
   const passed = percent >= quiz.passingPercent;
+  const timeTakenSeconds = Math.max(0, Math.min(Number(input.timeTakenSeconds) || 0, 24 * 60 * 60));
   await connectDb();
   const attempt = await QuizAttemptModel.create({
     userId: student.id,
     quizSlug: quiz.slug,
     quizTitle: quiz.title,
     courseSlug: quiz.courseSlug,
-    answers: input.answers,
+    answers,
     order,
     score,
     total,
     percent,
     passed,
-    timeTakenSeconds: input.timeTakenSeconds,
+    timeTakenSeconds,
   });
   revalidatePath("/dashboard/results");
-  return { attemptId: String(attempt._id), score, total, percent, passed, order, answers: input.answers };
+  return { attemptId: String(attempt._id), score, total, percent, passed, order, answers };
 }
 
 // ---------- checkout ----------
@@ -234,12 +178,14 @@ export async function createOrderAction(input: { lines: CartLine[]; couponCode: 
   if (!student) return { orderId: "", total: 0, error: "Please sign in to continue." };
   if (!isDbConfigured()) return { orderId: "", total: 0, error: "Checkout is not available yet — database not connected." };
 
-  const items = await priceCart(input.lines);
+  // Prices always come from the server catalog, never from the client cart.
+  const items = await priceCart(Array.isArray(input?.lines) ? input.lines : []);
   if (items.length === 0) return { orderId: "", total: 0, error: "Your cart is empty." };
   const subtotal = items.reduce((s, i) => s + i.price, 0);
-  const { coupon, discount, error } = await applyCoupon(input.couponCode, subtotal, student.id);
+  const { coupon, discount, error } = await applyCoupon(String(input.couponCode ?? ""), subtotal, student.id);
   if (error) return { orderId: "", total: 0, error };
   const total = Math.max(0, subtotal - discount);
+  const method = input.method === "razorpay" ? "razorpay" : "pay-later";
 
   await connectDb();
   const order: any = await OrderModel.create({
@@ -250,7 +196,7 @@ export async function createOrderAction(input: { lines: CartLine[]; couponCode: 
     couponCode: coupon?.code ?? "",
     total,
     status: "pending",
-    paymentMethod: total === 0 ? "free" : input.method,
+    paymentMethod: total === 0 ? "free" : method,
   });
   const orderId = String(order._id);
 
@@ -259,7 +205,7 @@ export async function createOrderAction(input: { lines: CartLine[]; couponCode: 
     return { orderId, total };
   }
 
-  if (input.method === "razorpay" && isRazorpayConfigured()) {
+  if (method === "razorpay" && isRazorpayConfigured()) {
     try {
       const razorpayOrderId = await createRazorpayOrder(total, orderId);
       order.razorpayOrderId = razorpayOrderId;
@@ -277,7 +223,8 @@ export async function createOrderAction(input: { lines: CartLine[]; couponCode: 
         },
       };
     } catch (err) {
-      return { orderId, total, error: err instanceof Error ? err.message : "Payment initialisation failed" };
+      console.error("[checkout] Razorpay order failed:", err);
+      return { orderId, total, error: "Payment initialisation failed. Please try again or choose pay later." };
     }
   }
 
@@ -288,8 +235,8 @@ export async function createOrderAction(input: { lines: CartLine[]; couponCode: 
 export async function validateCouponAction(input: { lines: CartLine[]; couponCode: string }) {
   const student = await getCurrentStudent();
   if (!student) return { discount: 0, error: "Sign in to apply a coupon." };
-  const items = await priceCart(input.lines);
+  const items = await priceCart(Array.isArray(input?.lines) ? input.lines : []);
   const subtotal = items.reduce((s, i) => s + i.price, 0);
-  const { coupon, discount, error } = await applyCoupon(input.couponCode, subtotal, student.id);
+  const { coupon, discount, error } = await applyCoupon(String(input.couponCode ?? ""), subtotal, student.id);
   return { discount, error, description: coupon?.description ?? "" };
 }

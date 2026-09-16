@@ -54,6 +54,12 @@ export function toCourse(doc: any): Course {
       })),
     })),
     materials: (doc.materials ?? []).map((m: any) => ({ label: m.label ?? "", url: m.url ?? "" })),
+    faqs: (doc.faqs ?? [])
+      .map((f: any) => ({ question: f.question ?? "", answer: f.answer ?? "" }))
+      .filter((f: { question: string; answer: string }) => f.question && f.answer),
+    metaTitle: doc.metaTitle ?? "",
+    metaDescription: doc.metaDescription ?? "",
+    updatedAt: doc.updatedAt ? new Date(doc.updatedAt).toISOString() : "",
   };
 }
 

@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { CourseForm } from "@/components/admin/course-form";
 import { getCourseBySlug } from "@/lib/services/courses";
 import { courses as staticCourses } from "@/lib/data/courses";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Edit Course" };
 
@@ -11,6 +12,7 @@ export default async function EditCoursePage({
   params,
   searchParams,
 }: PageProps<"/admin/courses/[slug]">) {
+  await requireAdmin();
   const { slug } = await params;
   const { error } = await searchParams;
   const course = await getCourseBySlug(slug);

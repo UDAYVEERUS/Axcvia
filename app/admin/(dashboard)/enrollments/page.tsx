@@ -6,6 +6,7 @@ import { formatInr } from "@/components/site/course-card";
 import { updateEnrollmentStatusAction } from "@/app/admin/actions";
 import { connectDb, isDbConfigured } from "@/lib/db";
 import { EnrollmentModel } from "@/lib/models/enrollment";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Enrollments" };
 
@@ -58,6 +59,7 @@ async function getRows(): Promise<{ rows: Row[]; dbReady: boolean }> {
 }
 
 export default async function AdminEnrollmentsPage() {
+  await requireAdmin();
   const { rows, dbReady } = await getRows();
   const revenue = rows.filter((r) => r.status === "paid").reduce((sum, r) => sum + r.amount, 0);
   const pipeline = rows.filter((r) => r.status === "pending" || r.status === "confirmed").reduce((sum, r) => sum + r.amount, 0);

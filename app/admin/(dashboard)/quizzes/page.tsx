@@ -9,12 +9,14 @@ import { quizzes as seed } from "@/lib/data/lms";
 import { QuizModel } from "@/lib/models/quiz";
 import { loadForAdmin } from "@/lib/services/content";
 import { toQuiz } from "@/lib/services/lms";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Quizzes & Mock Tests" };
 
 const PER_PAGE = 50;
 
 export default async function Page({ searchParams }: PageProps<"/admin/quizzes">) {
+  await requireAdmin();
   const flash = await searchParams;
   const { rows, dbReady } = await loadForAdmin(seed, QuizModel, toQuiz);
 

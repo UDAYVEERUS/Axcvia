@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { getCurrentStudent } from "@/lib/student/auth";
+import { requireStudent } from "@/lib/student/auth";
 import { getStudentEnrollments } from "@/lib/student/enrollments";
 import { formatDate } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Certificates", robots: { index: false } };
 
 export default async function CertificatesPage() {
-  const student = (await getCurrentStudent())!;
+  const student = await requireStudent("/dashboard/certificates");
   const issued = (await getStudentEnrollments(student.id)).filter((e) => e.certificateIssuedAt);
   if (issued.length === 0) return <p className="rounded-xl border border-dashed bg-card p-10 text-center text-sm text-muted-foreground">Complete all lessons in a course to earn its certificate of completion.</p>;
   return (

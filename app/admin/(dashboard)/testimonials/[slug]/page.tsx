@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { TestimonialForm } from "@/components/admin/testimonial-form";
 import { getAllTestimonials } from "@/lib/services/testimonials";
 import { testimonials as seed } from "@/lib/data/people";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Edit Testimonial" };
 
 export default async function EditTestimonialPage({ params, searchParams }: PageProps<"/admin/testimonials/[slug]">) {
+  await requireAdmin();
   const { slug } = await params;
   const { error } = await searchParams;
   const item = (await getAllTestimonials()).find((i) => i.slug === slug);

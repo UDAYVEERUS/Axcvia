@@ -9,10 +9,12 @@ import { isCloudinaryConfigured } from "@/lib/cloudinary";
 import { isDbConfigured } from "@/lib/db";
 import { isRazorpayConfigured } from "@/lib/payments/razorpay";
 import { getSettings } from "@/lib/services/lms";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage({ searchParams }: PageProps<"/admin/settings">) {
+  await requireAdmin();
   const { saved, error } = await searchParams;
   const s = await getSettings();
   const integrations = [

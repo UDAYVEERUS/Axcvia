@@ -11,10 +11,12 @@ import { BlogPostModel } from "@/lib/models/blog-post";
 import { toBlogPost } from "@/lib/services/blog";
 import { loadForAdmin } from "@/lib/services/content";
 import { formatDate } from "@/lib/utils";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Blog" };
 
 export default async function AdminBlogPage({ searchParams }: PageProps<"/admin/blog">) {
+  await requireAdmin();
   const flash = await searchParams;
   const { rows, dbReady } = await loadForAdmin(seed, BlogPostModel, toBlogPost);
   rows.sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));

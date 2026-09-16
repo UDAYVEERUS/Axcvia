@@ -13,6 +13,7 @@ import { OrderModel } from "@/lib/models/order";
 import { StudentModel } from "@/lib/models/student";
 import { formatInr } from "@/components/site/course-card";
 import { LeadModel } from "@/lib/models/lead";
+import { requireAdmin } from "@/lib/admin/auth";
 
 async function getCounts() {
   const empty = { dbCourses: 0, dbPosts: 0, leads: 0, newLeads: 0, enrollments: 0, pendingEnrollments: 0, students: 0, revenue: 0, pendingOrders: 0, dbReady: false };
@@ -37,6 +38,7 @@ async function getCounts() {
 }
 
 export default async function AdminOverviewPage() {
+  await requireAdmin();
   const { dbCourses, dbPosts, leads, newLeads, enrollments, pendingEnrollments, students, revenue, pendingOrders, dbReady } = await getCounts();
 
   const cards = [

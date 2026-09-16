@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { LandingPageForm } from "@/components/admin/landing-page-form";
 import { getLandingPageBySlug } from "@/lib/services/lms";
 import { landingPages as seed } from "@/lib/data/lms";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Edit Landing Page" };
 
 export default async function Page({ params, searchParams }: PageProps<"/admin/pages/[slug]">) {
+  await requireAdmin();
   const { slug } = await params;
   const { error } = await searchParams;
   const item = await getLandingPageBySlug(slug);

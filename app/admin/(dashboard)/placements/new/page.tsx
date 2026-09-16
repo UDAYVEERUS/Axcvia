@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { PlacementForm } from "@/components/admin/placement-form";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Add Placement" };
 
 export default async function NewPlacementPage({ searchParams }: PageProps<"/admin/placements/new">) {
+  await requireAdmin();
   const { error } = await searchParams;
   return (
     <div>

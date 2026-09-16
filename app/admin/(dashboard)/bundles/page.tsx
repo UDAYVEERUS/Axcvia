@@ -10,10 +10,12 @@ import { bundles as seed } from "@/lib/data/lms";
 import { BundleModel } from "@/lib/models/bundle";
 import { loadForAdmin } from "@/lib/services/content";
 import { toBundle } from "@/lib/services/lms";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Course Bundles" };
 
 export default async function Page({ searchParams }: PageProps<"/admin/bundles">) {
+  await requireAdmin();
   const flash = await searchParams;
   const { rows, dbReady } = await loadForAdmin(seed, BundleModel, toBundle);
   return (

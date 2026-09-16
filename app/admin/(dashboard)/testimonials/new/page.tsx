@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { TestimonialForm } from "@/components/admin/testimonial-form";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Add Testimonial" };
 
 export default async function NewTestimonialPage({ searchParams }: PageProps<"/admin/testimonials/new">) {
+  await requireAdmin();
   const { error } = await searchParams;
   return (
     <div>

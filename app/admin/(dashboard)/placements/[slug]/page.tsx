@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { PlacementForm } from "@/components/admin/placement-form";
 import { getAllPlacements } from "@/lib/services/placements";
 import { placementStories as seed } from "@/lib/data/people";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Edit Placement" };
 
 export default async function EditPlacementPage({ params, searchParams }: PageProps<"/admin/placements/[slug]">) {
+  await requireAdmin();
   const { slug } = await params;
   const { error } = await searchParams;
   const item = (await getAllPlacements()).find((i) => i.slug === slug);

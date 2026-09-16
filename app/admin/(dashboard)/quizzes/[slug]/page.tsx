@@ -4,10 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { QuizForm } from "@/components/admin/quiz-form";
 import { getQuizBySlug } from "@/lib/services/lms";
 import { quizzes as seed } from "@/lib/data/lms";
+import { requireAdmin } from "@/lib/admin/auth";
 
 export const metadata: Metadata = { title: "Edit Quiz" };
 
 export default async function Page({ params, searchParams }: PageProps<"/admin/quizzes/[slug]">) {
+  await requireAdmin();
   const { slug } = await params;
   const { error } = await searchParams;
   const item = await getQuizBySlug(slug);
