@@ -1,8 +1,21 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { safeNext } from "@/lib/student/auth";
+import { AuthCard } from "@/components/site/auth-card";
+import { isGoogleConfigured } from "@/lib/auth";
+import { getCurrentStudent, safeNext } from "@/lib/student/auth";
 
-// Accounts are created on first Google sign-in, so /register just forwards to /login.
+export const metadata: Metadata = { title: "Create your account", robots: { index: false } };
+
 export default async function Page({ searchParams }: PageProps<"/register">) {
-  const { next } = await searchParams;
-  redirect(`/login?next=${encodeURIComponent(safeNext(next))}`);
+  const { next, error } = await searchParams;
+  const nextPath = safeNext(next);
+  if (await getCurrentStudent()) redirect(nextPath);
+  return (
+    <AuthCard
+      mode="register"
+      next={nextPath}
+      error={typeof error === "string" ? error : undefined}
+      configured={isGoogleConfigured()}
+    />
+  );
 }

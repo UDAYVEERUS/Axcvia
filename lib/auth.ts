@@ -3,7 +3,9 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
+import { site } from "@/lib/data/site";
 import { DB_NAME, getMongoClient } from "@/lib/db";
+import { emailLayout, isEmailConfigured, sendMail } from "@/lib/email";
 
 /**
  * Authentication: Google OAuth 2.0 (authorization code + PKCE + state) via
@@ -28,6 +30,23 @@ export function isGoogleConfigured() {
   return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 }
 
+/**
+ * Origins allowed to start a sign-in. Better Auth rejects anything else with
+ * "Invalid origin", so the live domain is listed explicitly here rather than
+ * relying on BETTER_AUTH_URL being set correctly on every host.
+ * Extra origins (preview deployments) can be added via TRUSTED_ORIGINS.
+ */
+const trustedOrigins = [
+  ...(process.env.BETTER_AUTH_URL ? [process.env.BETTER_AUTH_URL] : []),
+  site.url,
+  site.url.replace("://www.", "://"),
+  ...(process.env.NODE_ENV === "production" ? [] : ["http://localhost:3000", "http://localhost:3100"]),
+  ...(process.env.TRUSTED_ORIGINS ?? "")
+    .split(",")
+    .map((o) => o.trim())
+    .filter(Boolean),
+].filter((origin, i, all) => all.indexOf(origin) === i);
+
 const client = getMongoClient();
 
 export const auth = betterAuth({
@@ -35,6 +54,39 @@ export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,
   database: mongodbAdapter(client.db(DB_NAME), { client }),
+  trustedOrigins,
+
+  // Students can use Google or an email + password account.
+  // Email verification is intentionally off; password reset goes out over SMTP
+  // (lib/email.ts). Without SMTP configured the reset request still returns OK
+  // so the form can't be used to discover which emails are registered.
+  emailAndPassword: {
+    enabled: true,
+    minPasswordLength: 8,
+    maxPasswordLength: 128,
+    autoSignIn: true,
+    requireEmailVerification: false,
+    resetPasswordTokenExpiresIn: 60 * 60, // 1 hour
+    sendResetPassword: async ({ user, url }) => {
+      if (!isEmailConfigured()) {
+        console.error("[auth] password reset requested but SMTP is not configured — no email sent to", user.email);
+        return;
+      }
+      const firstName = (user.name ?? "").split(" ")[0] || "there";
+      await sendMail({
+        to: user.email,
+        subject: `Reset your ${site.name} password`,
+        text: `Hi ${firstName},\n\nReset your ${site.name} password using this link (valid for 1 hour):\n${url}\n\nIf you didn't ask for this, you can ignore this email — your password stays unchanged.\n\n${site.name} · ${site.phone}`,
+        html: emailLayout({
+          heading: "Reset your password",
+          body: `Hi ${firstName}, we received a request to reset the password for <strong>${user.email}</strong>. This link is valid for one hour.`,
+          buttonLabel: "Choose a new password",
+          buttonUrl: url,
+          footNote: "If you didn't ask for this, ignore this email — your password stays unchanged.",
+        }),
+      });
+    },
+  },
 
   socialProviders: {
     google: {
@@ -48,7 +100,8 @@ export const auth = betterAuth({
     // App-owned profile fields. `input: false` stops clients setting them
     // through the auth API; the app updates them in Server Actions.
     additionalFields: {
-      phone: { type: "string", required: false, defaultValue: "", input: false },
+      // Collected on the registration form; students can edit it in their profile.
+      phone: { type: "string", required: false, defaultValue: "", input: true },
       wishlist: { type: "string[]", required: false, defaultValue: [], input: false },
     },
   },
