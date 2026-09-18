@@ -105,16 +105,6 @@ export interface Trainer {
   linkedin: string;
 }
 
-export interface Center {
-  name: string;
-  city: string;
-  address: string;
-  phone: string;
-  hours: string;
-  mapUrl: string;
-  image: string;
-}
-
 export interface Testimonial {
   /** Stable key used to merge dashboard edits over the seed. */
   slug: string;

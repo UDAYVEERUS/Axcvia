@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
+import { Clock, Globe, Mail, MessageCircle, Phone } from "lucide-react";
 import { EnquiryForm } from "@/components/site/enquiry-form";
 import { Reveal } from "@/components/site/motion";
 import { SectionHeading } from "@/components/site/section-heading";
@@ -72,23 +72,16 @@ export default async function ContactPage({ searchParams }: PageProps<"/contact"
             <div className="rounded-xl border bg-card p-5 shadow-sm">
               <div className="flex items-start gap-4">
                 <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-teal/10">
-                  <MapPin className="size-5 text-teal" aria-hidden />
+                  <Globe className="size-5 text-teal" aria-hidden />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Registered office</p>
-                  <p className="font-semibold text-navy">{site.address}</p>
+                  <p className="text-sm text-muted-foreground">Where we teach</p>
+                  <p className="font-semibold text-navy">100% online — join live from anywhere in India</p>
                   <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                     <Clock className="size-4" aria-hidden /> {site.hours}
                   </p>
                 </div>
               </div>
-              <iframe
-                title="Axcvia registered office location"
-                src="https://www.google.com/maps?q=Ratanpur,+Panki,+Kanpur&output=embed"
-                className="mt-4 h-56 w-full rounded-lg border"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
             </div>
           </div>
         </Reveal>

@@ -47,13 +47,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
               image: `${site.url}/logo.png`,
               telephone: site.phone,
               email: site.email,
-              address: {
-                "@type": "PostalAddress",
-                streetAddress: site.address,
-                addressLocality: "Kanpur",
-                addressRegion: "Uttar Pradesh",
-                addressCountry: "IN",
-              },
               areaServed: { "@type": "Country", name: "India" },
               knowsLanguage: ["en", "hi"],
               contactPoint: {

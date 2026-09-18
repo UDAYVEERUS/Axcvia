@@ -1,4 +1,4 @@
-import type { Trainer, Center, Testimonial, PlacementStory, Faq } from "@/lib/types";
+import type { Trainer, Testimonial, PlacementStory, Faq } from "@/lib/types";
 import { slugify } from "@/lib/utils";
 
 export const trainers: Trainer[] = [
@@ -61,36 +61,6 @@ export const trainers: Trainer[] = [
 export function getTrainer(slug: string) {
   return trainers.find((t) => t.slug === slug);
 }
-
-export const centers: Center[] = [
-  {
-    name: "Axcvia BTM Layout (Head Office)",
-    city: "Bengaluru",
-    address: "3rd Floor, Tech Park Tower, 100 Feet Ring Road, BTM Layout, Bengaluru 560076",
-    phone: "+91 98765 43210",
-    hours: "Mon–Sat, 9:00 AM – 8:00 PM",
-    mapUrl: "https://maps.google.com/?q=BTM+Layout+Bengaluru",
-    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=70",
-  },
-  {
-    name: "Axcvia Rajajinagar",
-    city: "Bengaluru",
-    address: "2nd Floor, Chord Road Plaza, Rajajinagar, Bengaluru 560010",
-    phone: "+91 98765 43211",
-    hours: "Mon–Sat, 9:00 AM – 8:00 PM",
-    mapUrl: "https://maps.google.com/?q=Rajajinagar+Bengaluru",
-    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=900&q=70",
-  },
-  {
-    name: "Axcvia Hyderabad",
-    city: "Hyderabad",
-    address: "4th Floor, Cyber Heights, Ameerpet, Hyderabad 500016",
-    phone: "+91 98765 43212",
-    hours: "Mon–Sat, 9:00 AM – 8:00 PM",
-    mapUrl: "https://maps.google.com/?q=Ameerpet+Hyderabad",
-    image: "https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=900&q=70",
-  },
-];
 
 const testimonialSeed: Omit<Testimonial, "slug">[] = [
   {
@@ -213,7 +183,7 @@ const faqSeed: Omit<Faq, "slug">[] = [
   {
     question: "What formats do you offer — live online or self-paced?",
     answer:
-      "Both. Live-online instructor-led batches over video with real-time doubt clearing, and self-paced recorded courses with weekly doubt-clearing sessions. We're online-first for now — classroom centers are on our roadmap.",
+      "Both. Live-online instructor-led batches over video with real-time doubt clearing, and self-paced recorded courses with weekly doubt-clearing sessions. Everything is 100% online, so you can join from anywhere in India.",
     category: "Courses",
   },
   {

@@ -23,7 +23,7 @@ import { stats } from "@/lib/data/site";
 export const metadata: Metadata = {
   title: "About Us — Our Mission, Story & Team",
   description:
-    "Axcvia is a programming training institute founded by working engineers in Kanpur. Learn about our mission, how we teach, our journey so far, and the team behind it.",
+    "Axcvia is a programming training institute founded by working engineers, teaching 100% online. Learn about our mission, how we teach, our journey so far, and the team behind it.",
 };
 
 const values = [
@@ -73,7 +73,7 @@ const teachingPrinciples = [
 const milestones = [
   {
     year: "2025",
-    title: "Founded in Kanpur",
+    title: "Founded, fully online",
     text: "Started by working engineers with a single live-online Java batch of 12 students.",
   },
   {
@@ -89,7 +89,7 @@ const milestones = [
   {
     year: "Today",
     title: "Growing every batch",
-    text: "14+ programming courses including AI & Machine Learning, 350+ students trained across India — fully online, with classroom centers on the roadmap.",
+    text: "14+ programming courses including AI & Machine Learning, 350+ students trained across India — fully online.",
   },
 ];
 

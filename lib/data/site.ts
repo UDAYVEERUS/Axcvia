@@ -7,7 +7,6 @@ export const site = {
   phone: "+91 91960 05457",
   whatsapp: "919196005457",
   email: "info@axcvia.com",
-  address: "A-43, Phase 4, Ratanpur, Panki, Kanpur, Uttar Pradesh",
   hours: "Mon–Sat, 9:00 AM – 8:00 PM",
   social: {
     linkedin: "https://www.linkedin.com/company/axcvia",

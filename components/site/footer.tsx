@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Globe, Mail, Phone } from "lucide-react";
 import { site, navLinks, moreLinks } from "@/lib/data/site";
 import { getAllCourses } from "@/lib/services/courses";
 import { slugify } from "@/lib/utils";
@@ -61,8 +61,8 @@ export async function Footer() {
                 <Phone className="size-4 shrink-0 text-teal-bright" aria-hidden /> {site.phone}
               </a>
             </li>
-            <li className="flex items-start gap-2.5">
-              <MapPin className="mt-0.5 size-4 shrink-0 text-teal-bright" aria-hidden /> {site.address}
+            <li className="flex items-center gap-2.5">
+              <Globe className="size-4 shrink-0 text-teal-bright" aria-hidden /> 100% online · across India
             </li>
             <li className="flex items-center gap-2.5">
               <Clock className="size-4 shrink-0 text-teal-bright" aria-hidden /> {site.hours}

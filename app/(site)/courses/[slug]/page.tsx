@@ -11,7 +11,7 @@ import {
   Clock,
   FileText,
   Lock,
-  MapPin,
+  Globe,
   PlayCircle,
   Unlock,
 } from "lucide-react";
@@ -137,9 +137,8 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
         courseMode: course.mode === "offline" ? "Onsite" : course.mode === "hybrid" ? "Blended" : "Online",
         ...(isoDuration(course.duration) && { courseWorkload: isoDuration(course.duration) }),
         ...(startDate && { startDate }),
-        ...(course.mode === "online"
-          ? { location: { "@type": "VirtualLocation", url: courseUrl } }
-          : { location: { "@type": "Place", name: site.name, address: site.address } }),
+        // Axcvia teaches online only — there is no physical venue.
+        location: { "@type": "VirtualLocation", url: courseUrl },
         ...(trainer && { instructor: { "@type": "Person", name: trainer.name, jobTitle: trainer.role } }),
       },
     ],
@@ -180,7 +179,7 @@ export default async function CourseDetailPage({ params }: PageProps<"/courses/[
   const facts = [
     { icon: BarChart3, label: `${course.level} level` },
     course.duration && { icon: Clock, label: course.duration },
-    { icon: MapPin, label: modeLabel[course.mode] },
+    { icon: Globe, label: modeLabel[course.mode] },
     course.nextBatch && { icon: CalendarDays, label: `Next batch: ${course.nextBatch}` },
     course.certificate !== false && { icon: Award, label: "Certificate of completion" },
   ].filter(Boolean) as { icon: typeof Clock; label: string }[];
